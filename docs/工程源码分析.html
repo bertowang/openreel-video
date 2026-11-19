@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenReel Video 工程源码分析（重构版）</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #fff;
+      --ink: #202431;
+      --muted: #616a7a;
+      --line: #e4e7ef;
+      --brand: #0f766e;
+      --brand-2: #4338ca;
+      --brand-soft: #ecfeff;
+      --brand2-soft: #eef2ff;
+      --warn: #b45309;
+      --warn-soft: #fffbeb;
+      --danger: #b91c1c;
+      --danger-soft: #fef2f2;
+      --code-bg: #111827;
+      --code-ink: #e5e7eb;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(32, 36, 49, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.75;
+      font-size: 15px;
+    }
+    a { color: var(--brand-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header {
+      background: linear-gradient(135deg, #134e4a, #0f766e 50%, #4338ca);
+      color: #fff;
+      padding: 34px 24px 28px;
+    }
+    .wrap { max-width: 1240px; margin: 0 auto; }
+    header h1 { margin: 0 0 8px; font-size: 30px; }
+    header p { margin: 0; max-width: 920px; opacity: .94; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .badge { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); }
+    .links { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 16px; }
+    .links a { color: #fff; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; }
+    .layout { max-width: 1240px; margin: 24px auto 60px; padding: 0 20px; display: grid; grid-template-columns: 258px minmax(0, 1fr); gap: 24px; align-items: start; }
+    aside { position: sticky; top: 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 16px; box-shadow: var(--shadow); max-height: calc(100vh - 40px); overflow: auto; }
+    aside strong { display: block; color: var(--muted); font-size: 12px; letter-spacing: .1em; margin-bottom: 10px; }
+    aside ol { padding-left: 20px; margin: 0; }
+    aside li { margin: 5px 0; }
+    aside a { color: var(--ink); font-size: 13px; }
+    article { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px 36px 46px; box-shadow: var(--shadow); min-width: 0; }
+    h2 { margin: 44px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--brand-soft); font-size: 22px; scroll-margin-top: 20px; }
+    h2:first-of-type { margin-top: 6px; }
+    h3 { margin: 26px 0 10px; font-size: 17px; color: #0f5f59; scroll-margin-top: 20px; }
+    h4 { margin: 18px 0 8px; font-size: 15px; color: #3730a3; }
+    p { margin: 10px 0; }
+    ul, ol { padding-left: 22px; }
+    li { margin: 5px 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f1f3f7; border: 1px solid #e5e8f0; border-radius: 5px; padding: 1px 5px; font-size: .9em; }
+    kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f8fafc; border: 1px solid #cbd5e1; border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; font-size: 12px; white-space: nowrap; }
+    pre { background: var(--code-bg); color: var(--code-ink); border-radius: 10px; padding: 16px 18px; overflow: auto; line-height: 1.55; font-size: 13px; }
+    pre code { background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--line); padding: 9px 11px; text-align: left; vertical-align: top; min-width: 130px; }
+    th { background: #f8f9fc; }
+    tr:nth-child(even) td { background: #fcfcfe; }
+    .callout { border-left: 4px solid var(--brand); background: var(--brand-soft); padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 16px 0; }
+    .callout.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+    .callout.danger { border-left-color: var(--danger); background: var(--danger-soft); }
+    .callout.brand2 { border-left-color: var(--brand-2); background: var(--brand2-soft); }
+    .callout p:first-child { margin-top: 0; }
+    .callout p:last-child { margin-bottom: 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 16px 0; }
+    .card { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: #fbfbfe; }
+    .card h4 { margin-top: 0; }
+    .flow { white-space: pre; overflow-x: auto; }
+    .ui-diagram { display: grid; grid-template-areas: "top" "main" "timeline"; gap: 8px; margin: 16px 0; }
+    .ui-diagram > div { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: #fbfbfe; }
+    .ui-diagram .top { grid-area: top; text-align: center; background: #eef2ff; font-weight: 600; }
+    .ui-diagram .main { grid-area: main; display: grid; grid-template-columns: 150px minmax(0, 1fr) 220px; gap: 8px; }
+    .ui-diagram .main > div { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #fff; }
+    .ui-diagram .timeline { grid-area: timeline; text-align: center; background: var(--brand-soft); font-weight: 600; }
+    .ui-diagram .caption { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 3px; }
+    .small { font-size: 13px; color: var(--muted); }
+    .tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: #eef2ff; color: #3730a3; margin-right: 4px; }
+    .tag.core { background: #ecfeff; color: #0f5f59; }
+    .tag.warn { background: #fffbeb; color: #92400e; }
+    details { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 10px 0; background: #fbfbfe; }
+    summary { cursor: pointer; font-weight: 600; color: #3730a3; }
+    summary code { font-weight: 400; }
+    details ul { margin-bottom: 6px; }
+    .route { border-left: 3px solid var(--brand-2); padding: 8px 14px; background: var(--brand2-soft); border-radius: 0 8px 8px 0; margin: 10px 0; }
+    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; }
+    @media (max-width: 880px) { .layout { grid-template-columns: 1fr; } aside { position: static; max-height: none; } article { padding: 22px 18px 34px; } header h1 { font-size: 24px; } .ui-diagram .main { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>OpenReel Video 工程源码分析</h1>
+      <p>一份面向程序员的“源码地图”：先建立全局认知，再理解核心概念和数据流，最后按模块与技术逐层深入。目标是回答三个问题：<strong>工程如何组织、数据如何流动、改动应该去哪里找</strong>。</p>
+      <div class="badges">
+        <span class="badge">React 19 + TypeScript</span>
+        <span class="badge">Vite + pnpm workspace</span>
+        <span class="badge">Zustand + @openreel/core</span>
+        <span class="badge">WebCodecs / WebGPU / WASM</span>
+        <span class="badge">结构化重构版：2026-11-19</span>
+      </div>
+      <nav class="links">
+        <a href="./界面英文菜单对照.html">界面英文菜单对照</a>
+        <a href="./编辑使用攻略.html">编辑使用攻略</a>
+        <a href="./部署与操作指南.html">部署与操作指南</a>
+        <a href="../README.md">README</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <strong>目录</strong>
+      <ol>
+        <li><a href="#overview">1. 一页看懂工程</a></li>
+        <li><a href="#browser-role">2. 浏览器在工程中的角色（Web 新手指南）</a></li>
+        <li><a href="#glossary">3. 核心概念词典</a></li>
+        <li><a href="#dataflow">4. 端到端数据流</a></li>
+        <li><a href="#bootstrap">5. 启动与路由</a></li>
+        <li><a href="#workspace">6. Monorepo 与包依赖</a></li>
+        <li><a href="#state">7. 状态管理与持久化</a></li>
+        <li><a href="#editor-ui">8. 编辑器 UI 组装</a></li>
+        <li><a href="#core">9. 核心引擎 @openreel/core</a></li>
+        <li><a href="#edit-principles">10. 音视频编辑操作的技术原理</a></li>
+        <li><a href="#agent-collab-services">11. Agent、协作与服务层</a></li>
+        <li><a href="#crosscut">12. 横切机制</a></li>
+        <li><a href="#testing">13. 测试与质量保障</a></li>
+        <li><a href="#reading-map">14. 深入阅读与修改索引</a></li>
+        <li><a href="#risks">15. 风险与维护提示</a></li>
+        <li><a href="#technology">16. 核心技术详解</a></li>
+        <li><a href="#codec-guide">17. 编解码背景程序员快速上手</a></li>
+        <li><a href="#appendix">18. 附录：关键文件索引</a></li>
+      </ol>
+      <p class="small" style="margin-top:14px"><a href="#top">回到顶部</a></p>
+    </aside>
+
+    <article id="top">
+      <section id="overview">
+        <h2>1. 一页看懂工程</h2>
+        <div class="route"><strong>本节回答：</strong>这是什么工程？技术栈分几层？目录大致怎么放？</div>
+
+        <h3>1.1 工程定位</h3>
+        <p>OpenReel Video 是一个<strong>浏览器端本地优先</strong>的专业视频编辑器。核心理念是：媒体尽量留在用户设备本地处理，服务端只做协作、市场 API 和代理转发等少量工作。</p>
+        <div class="flow"><code>本地浏览器 / Electron
+    │
+    ├── React UI：欢迎页、编辑器、面板、AI 对话
+    ├── Zustand Store：工程状态、时间线状态、UI 偏好
+    ├── @openreel/core：时间线、动作、渲染、字幕、导出领域规则
+    ├── @openreel/agent：把编辑能力注册成工具供 LLM 调用
+    ├── @openreel/collab：操作排序、冲突检测、多人协作
+    ├── @openreel/ui：基础组件库
+    └── Cloudflare：API 代理、协作房间、市场与 crash API</code></div>
+
+        <h3>1.2 技术栈分层</h3>
+        <table>
+          <thead><tr><th>层</th><th>主要技术</th><th>负责什么</th><th>深入章节</th></tr></thead>
+          <tbody>
+            <tr><td>UI 层</td><td>React 19、TypeScript、Radix、Tailwind</td><td>页面、面板、交互、主题与基础控件。</td><td><a href="#editor-ui">8</a> / <a href="#technology">16</a></td></tr>
+            <tr><td>状态层</td><td>Zustand、slice、selector</td><td>工程对象、时间线、UI 偏好、设置的状态中心。</td><td><a href="#state">7</a></td></tr>
+            <tr><td>领域层</td><td>@openreel/core、ActionExecutor、ActionHistory</td><td>可撤销编辑、时间线语义、渲染/导出/字幕规则。</td><td><a href="#core">9</a></td></tr>
+            <tr><td>渲染层</td><td>WebGPU、WGSL、Canvas2D、Web Audio API</td><td>预览合成、特效、混音。</td><td><a href="#technology">16</a></td></tr>
+            <tr><td>计算层</td><td>Web Worker、AssemblyScript WASM、ONNX Runtime Web</td><td>音频分析、转录、抠像、RAW、导出等后台任务。</td><td><a href="#dataflow">4</a> / <a href="#technology">16</a></td></tr>
+            <tr><td>存储层</td><td>IndexedDB、localStorage、Service Worker</td><td>项目、自动保存、媒体 Blob、偏好与离线缓存。</td><td><a href="#state">7</a></td></tr>
+            <tr><td>服务层</td><td>Cloudflare Pages Functions、Worker、Durable Objects</td><td>API 代理、协作房间、市场与诊断接口。</td><td><a href="#agent-collab-services">11</a></td></tr>
+            <tr><td>构建与桌面</td><td>Vite、pnpm workspace、Electron、tsup、electron-builder</td><td>开发构建、包管理、桌面壳与安装包。</td><td><a href="#workspace">6</a></td></tr>
+          </tbody>
+        </table>
+
+        <h3>1.3 目录速查</h3>
+        <table>
+          <thead><tr><th>路径</th><th>一句话说明</th><th>什么时候看</th></tr></thead>
+          <tbody>
+            <tr><td><code>apps/web/src</code></td><td>Web 编辑器 UI、状态、服务、hooks、workers。</td><td>改界面、交互、业务流程。</td></tr>
+            <tr><td><code>packages/core/src</code></td><td>编辑器领域引擎：时间线、动作、渲染、导出、字幕。</td><td>改编辑语义或底层算法。</td></tr>
+            <tr><td><code>packages/agent/src</code></td><td>AI 工具注册表、LLM 协议、工具执行。</td><td>改 AI 编辑能力。</td></tr>
+            <tr><td><code>packages/collab/src</code></td><td>协作协议、冲突检测、房间逻辑。</td><td>改多人协作。</td></tr>
+            <tr><td><code>packages/ui/src</code></td><td>基础控件库。</td><td>改通用组件样式与交互。</td></tr>
+            <tr><td><code>apps/desktop</code></td><td>Electron 主进程、preload、ffmpeg sidecar、打包。</td><td>改桌面能力。</td></tr>
+            <tr><td><code>apps/cloud</code></td><td>Cloudflare Worker 后端。</td><td>改协作房间与云 API。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>1.4 推荐阅读路径</h3>
+        <div class="route"><strong>不熟悉 Web 开发：</strong>先读 <a href="#browser-role">2. 浏览器在工程中的角色</a>，再按 1 → 3 → 4 的顺序看。</div>
+        <div class="route"><strong>新人快速上手：</strong>1 → 2 → 3 → 4 → 10 → 14</div>
+        <div class="route"><strong>做业务功能：</strong>7 → 8 → 9 → 10 → 14；再根据是否涉及 AI/协作看第 11 章。</div>
+        <div class="route"><strong>做性能或底层：</strong>4 → 9 → 10 → 16 → 13。</div>
+        <div class="route"><strong>有编解码算法背景：</strong>直接看 <a href="#codec-guide">17. 编解码背景程序员快速上手</a>，再回看 4、9、10、16。</div>
+        <div class="route"><strong>接手桌面端：</strong>5 → 6 → 16（Electron 条目）→ 15。</div>
+      </section>
+
+      <section id="browser-role">
+        <h2>2. 浏览器在工程中的角色（Web 新手指南）</h2>
+        <div class="route"><strong>本节回答：</strong>如果你熟悉服务端或原生程序，Chrome 在这里到底是运行容器、UI 框架、媒体引擎，还是安全沙箱？答案是：它同时承担这些角色，但各管一段。</div>
+
+        <h3>2.1 一句话理解</h3>
+        <p>在这个工程里，浏览器相当于应用的<strong>“操作系统 + 显示屏 + 工具箱 + 保安”</strong>：</p>
+        <ul>
+          <li><strong>工程代码负责“想做什么”</strong>：时间线怎么剪、撤销怎么记、AI 工具怎么调用、导出什么格式。</li>
+          <li><strong>浏览器负责“在哪里做、用什么能力做、受什么限制做”</strong>：把 React 组件画成画面、接收鼠标键盘事件、提供编解码/GPU/音频/存储 API，同时限制代码不能乱读磁盘。</li>
+        </ul>
+        <div class="callout">
+          <p>可以把 Chrome 理解成“带安全边界的应用运行时”。我们的 Web 应用不是直接跑在操作系统上，而是跑在浏览器提供的沙箱里。</p>
+        </div>
+
+        <h3>2.2 浏览器提供了什么，工程代码怎么用</h3>
+        <table>
+          <thead><tr><th>浏览器提供的能力</th><th>工程里的用途</th><th>对应代码</th></tr></thead>
+          <tbody>
+            <tr><td>HTML / CSS / JavaScript 引擎（V8、Blink）、DOM</td><td>把 React 组件渲染成用户看到的界面；执行业务 JS。</td><td><code>index.html</code>、<code>main.tsx</code>、<code>App.tsx</code>、<code>components/*</code></td></tr>
+            <tr><td>事件系统：click、drag、keyboard、pointer</td><td>用户点击按钮、拖动片段、按快捷键，最终变成 store action。</td><td><code>EditorInterface.tsx</code>、<code>services/keyboard-shortcuts.ts</code></td></tr>
+            <tr><td>File / Blob、MediaBunny、WebCodecs</td><td>导入本地视频/图片；解封装、解码、编码；导出视频文件。</td><td><code>packages/core/src/media/mediabunny-engine.ts</code>、<code>packages/core/src/export/webcodecs-backend.ts</code></td></tr>
+            <tr><td>WebGPU / Canvas2D、Web Audio API</td><td>实时合成预览画面、执行特效着色器、播放和混音。</td><td><code>apps/web/src/bridges/render-bridge.ts</code>、<code>packages/core/src/video</code>、<code>packages/core/src/audio</code></td></tr>
+            <tr><td>IndexedDB、localStorage、Service Worker</td><td>自动保存项目、存媒体 Blob、保存偏好、离线缓存。</td><td><code>auto-save.ts</code>、<code>project-manager.ts</code>、<code>service-worker.ts</code></td></tr>
+            <tr><td>fetch、CORS、COOP / COEP、权限系统</td><td>调用 API、代理第三方服务、允许 SharedArrayBuffer、限制越权访问。</td><td><code>apps/web/src/services/api-proxy.ts</code>、<code>apps/web/vite.config.ts</code>、<code>apps/web/public/_headers</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>2.3 一次“导入并导出”的协作过程</h3>
+        <ol>
+          <li><strong>启动</strong>：Vite dev server 把 <code>index.html</code> 和 JS 模块送给浏览器；浏览器执行 <code>main.tsx</code>。</li>
+          <li><strong>渲染 UI</strong>：React 创建 DOM，浏览器把它画成欢迎页或编辑器；这一步相当于原生应用的“窗口绘制”。</li>
+          <li><strong>选择文件</strong>：用户选中 MP4。浏览器通过 File API 把文件包装成 <code>File/Blob</code> 交给 JS；代码拿不到任意磁盘路径。</li>
+          <li><strong>解封装与解码</strong>：工程把 Blob 交给 MediaBunny；解码结果变成 <code>OffscreenCanvas</code>，由 WebGPU/Canvas2D 显示。</li>
+          <li><strong>编辑</strong>：用户拖动片段，工程生成一个 <code>Action</code>；Zustand store 更新，bridge 通知渲染引擎重画预览。</li>
+          <li><strong>导出</strong>：<code>WebCodecsBackend</code> 调浏览器的 <code>VideoEncoder/AudioEncoder</code> 编码，MediaBunny 负责封装，最后浏览器把文件下载到本机。</li>
+          <li><strong>落盘</strong>：工程状态写入 IndexedDB；Service Worker 缓存静态资源，支持刷新恢复与离线打开。</li>
+        </ol>
+
+        <h3>2.4 浏览器不做什么</h3>
+        <ul>
+          <li><strong>不是服务端</strong>：默认不会把工程上传到云；云只用于协作/API/市场。</li>
+          <li><strong>不给任意文件系统访问</strong>：只能使用用户显式选择的文件或授权后的 handle。</li>
+          <li><strong>不懂剪辑语义</strong>：时间线、撤销、转场、字幕规则都在 <code>@openreel/core</code>。</li>
+          <li><strong>不保证所有编码格式</strong>：浏览器支持什么 codec 就能用什么；ProRes/MXF 等需要桌面原生 ffmpeg。</li>
+          <li><strong>不保证内存常驻</strong>：刷新页面内存清空，必须靠 IndexedDB/localStorage 恢复状态。</li>
+        </ul>
+
+        <h3>2.5 为什么推荐 Chrome / Edge</h3>
+        <ul>
+          <li>WebCodecs、WebGPU、SharedArrayBuffer 支持更完整。</li>
+          <li>硬件编解码器与 GPU 加速更容易启用。</li>
+          <li>DevTools 可直接看 DOM、Console、Network、Application(IndexedDB)、Performance。</li>
+          <li>其他浏览器也能用，但可能走 Canvas2D 回退或缺少某些编码能力。</li>
+        </ul>
+
+        <h3>2.6 浏览器版与桌面版的能力边界</h3>
+        <table>
+          <thead><tr><th>能力</th><th>浏览器版</th><th>桌面版</th></tr></thead>
+          <tbody>
+            <tr><td>文件访问</td><td>用户选择的 File/Blob，受沙箱限制。</td><td>可结合 Electron 访问更多本地路径与 sidecar。</td></tr>
+            <tr><td>编解码</td><td>WebCodecs + MediaBunny，受浏览器 codec 支持限制。</td><td>原生 ffmpeg 覆盖 ProRes、DNxHR、MXF 等专业格式。</td></tr>
+            <tr><td>渲染</td><td>WebGPU 优先，Canvas2D 回退。</td><td>还可使用原生 Aurora 渲染核心。</td></tr>
+            <tr><td>后台计算</td><td>Web Worker + WASM。</td><td>可调用原生进程与更多 CPU/GPU 能力。</td></tr>
+            <tr><td>持久化</td><td>IndexedDB/localStorage，受浏览器配额限制。</td><td>可配合本地文件系统与备份流程。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>2.7 Web 新手排错速查</h3>
+        <table>
+          <thead><tr><th>现象</th><th>先怀疑什么</th><th>怎么查</th></tr></thead>
+          <tbody>
+            <tr><td>页面空白</td><td>JS 报错或缺 WASM 产物。</td><td>Console；确认执行过 <code>pnpm build:wasm</code>。</td></tr>
+            <tr><td>SharedArrayBuffer 报错</td><td>缺少 COOP/COEP 头。</td><td>Network 看响应头；自建代理要补 <code>_headers</code>。</td></tr>
+            <tr><td>导入素材失败</td><td>浏览器不支持该 codec。</td><td>看 <code>MediaBunny Input</code> 的轨道与 <code>canDecode()</code>。</td></tr>
+            <tr><td>预览卡顿</td><td>WebGPU 不可用，回退 Canvas2D。</td><td>DevTools Performance、<code>chrome://gpu</code>。</td></tr>
+            <tr><td>导出格式不可用</td><td>浏览器编码器不支持。</td><td>换 H.264/VP9 或使用桌面版。</td></tr>
+            <tr><td>刷新后状态丢失</td><td>只改了内存，没写 IndexedDB。</td><td>DevTools Application 看 IndexedDB/localStorage。</td></tr>
+            <tr><td>界面没有中文</td><td>当前版本没有 UI i18n。</td><td>见 <a href="./界面英文菜单对照.html">英文菜单对照</a> 与 <a href="#crosscut">第 12 章</a>。</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout brand2">
+          <p><strong>给非 Web 程序员的最后提示：</strong>不要把浏览器只看成“显示网页的壳”。在这个工程里，它同时是运行时、UI 渲染器、媒体能力提供者、存储容器和安全边界。工程代码负责业务规则，浏览器负责把这些规则落成用户能看到、能操作、能保存的结果。</p>
+        </div>
+      </section>
+
+      <section id="glossary">
+        <h2>3. 核心概念词典</h2>
+        <div class="route"><strong>本节回答：</strong>源码里反复出现的词到底指什么？</div>
+        <table>
+          <thead><tr><th>术语</th><th>中文理解</th><th>在工程中指什么</th><th>深入入口</th></tr></thead>
+          <tbody>
+            <tr><td><code>Project</code></td><td>工程</td><td>项目根对象，含 settings、mediaLibrary、timeline、sequences、bins 等。</td><td><code>core/src/types/project.ts</code></td></tr>
+            <tr><td><code>Sequence</code></td><td>序列</td><td>一段时间线组织，可存在多个序列。</td><td><code>core/src/types/project.ts</code></td></tr>
+            <tr><td><code>Timeline / Track / Clip</code></td><td>时间线 / 轨道 / 片段</td><td>编辑模型三件套：轨道承载片段，片段承载媒体与效果。</td><td><code>core/src/types/timeline.ts</code></td></tr>
+            <tr><td><code>Action</code></td><td>编辑动作</td><td>带 type、id、params 的可执行命令；是撤销与协作的基本单位。</td><td><code>core/src/types/actions.ts</code></td></tr>
+            <tr><td><code>ActionExecutor</code></td><td>动作执行器</td><td>校验 action、调用 handler、记录逆动作。</td><td><code>core/src/actions/action-executor.ts</code></td></tr>
+            <tr><td><code>Store / Slice</code></td><td>状态仓库 / 切片</td><td>Zustand 状态中心；大型 store 被拆成多个领域 slice。</td><td><code>apps/web/src/stores</code></td></tr>
+            <tr><td><code>Bridge</code></td><td>桥接层</td><td>把 store 的工程状态同步给渲染、播放、效果等引擎。</td><td><code>apps/web/src/bridges</code></td></tr>
+            <tr><td><code>Worker</code></td><td>Web Worker</td><td>后台线程，处理重计算而不阻塞 UI。</td><td><code>apps/web/src/workers</code></td></tr>
+            <tr><td><code>WASM</code></td><td>WebAssembly</td><td>AssemblyScript 编译的高性能模块，用于 FFT/WAV/节拍检测。</td><td><code>packages/core/src/wasm</code></td></tr>
+            <tr><td><code>WGSL</code></td><td>WebGPU Shading Language</td><td>WebGPU 着色器语言，用于合成、模糊、放大等 GPU 效果。</td><td><code>packages/core/src/video/shaders</code></td></tr>
+            <tr><td><code>Durable Object</code></td><td>有状态对象</td><td>Cloudflare Worker 中的单房间状态模型，用于协作。</td><td><code>apps/cloud/src/collab/room-do.ts</code></td></tr>
+            <tr><td><code>BYOK</code></td><td>自带密钥</td><td>用户自己配置 LLM/API key，应用不托管密钥。</td><td><code>services/api-proxy.ts</code></td></tr>
+            <tr><td><code>PWA / SW</code></td><td>渐进式 Web 应用 / Service Worker</td><td>离线缓存、后台更新与安装体验。</td><td><code>services/service-worker.ts</code></td></tr>
+            <tr><td><code>DOM</code></td><td>文档对象模型</td><td>浏览器把 HTML 解析成可操作的对象树；React 最终把组件渲染成 DOM。</td><td><code>index.html</code>、<code>main.tsx</code></td></tr>
+            <tr><td><code>Web API</code></td><td>浏览器提供的编程接口</td><td>File/Blob、IndexedDB、fetch、WebCodecs、WebGPU、Web Audio 等能力。</td><td>见第 2 章能力表</td></tr>
+            <tr><td><code>Blob / File</code></td><td>浏览器里的二进制数据</td><td>用户选择的视频/图片在 JS 里以 Blob/File 表示，是导入链路的起点。</td><td><code>packages/core/src/media/mediabunny-engine.ts</code></td></tr>
+            <tr><td><code>Sandbox</code></td><td>安全沙箱</td><td>网页代码不能直接读磁盘或执行系统命令，必须走浏览器 API 与用户授权。</td><td>见第 2 章“浏览器不做什么”</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="dataflow">
+        <h2>4. 端到端数据流</h2>
+        <div class="route"><strong>本节回答：</strong>一次点击或一句 AI 指令，是怎样变成预览画面、本地文件和导出视频的？</div>
+
+        <h3>4.1 一图看懂主链路</h3>
+        <div class="flow"><code>用户交互（点击 / 拖拽 / 键盘 / 对话输入）
+        │
+        ▼
+React 组件层：EditorInterface / Panels / Chat
+        │  事件、表单、拖拽数据、快捷键命令
+        ▼
+Zustand Store：project-store + slices / timeline / ui / settings
+        │  生成 action，更新内存状态，标记 dirty
+        ▼
+@openreel/core：ActionExecutor → handler.apply → ActionHistory
+        │  validate / apply / invert，保证每步可撤销
+        ▼
+Bridge 适配层：media / playback / render / effects / transition
+        │
+        ├──► 预览：WebGPU + WGSL / Canvas2D 回退 + Web Audio
+        ├──► 后台：Web Worker + AssemblyScript WASM + ONNX
+        ├──► 落盘：IndexedDB 项目/自动保存/媒体 + localStorage 偏好
+        ├──► AI：Agent.runTurn → tool_call → live-host → action
+        ├──► 协作：op → RoomCore 排序/冲突 → 远端重放
+        └──► 导出：ExportRunner → WebCodecs + MediaBunny（浏览器）/ 原生 ffmpeg（桌面）→ 文件
+
+结果回写：Store 更新 → React 重渲染 → 状态栏 / 时间线 / 预览 / Changes 面板同步</code></div>
+
+        <h3>4.2 主链路节点表</h3>
+        <table>
+          <thead><tr><th>节点</th><th>输入 → 输出</th><th>核心技术</th><th>技术为什么在这里</th><th>关键代码</th></tr></thead>
+          <tbody>
+            <tr><td>① 交互入口</td><td>事件 → 语义命令</td><td>React 19、ErrorBoundary</td><td>面板可独立加载与隔离崩溃，避免单面板错误拖垮编辑器。</td><td><code>EditorInterface.tsx</code></td></tr>
+            <tr><td>② 路由分发</td><td>URL hash / 菜单 → 页面</td><td>hash 路由、动态 import</td><td>纯前端部署无需服务端路由；编辑器按需加载减小首屏。</td><td><code>use-router.ts</code>、<code>editor-loader.ts</code></td></tr>
+            <tr><td>③ 状态编排</td><td>事件 → store action</td><td>Zustand、slice</td><td>轻量订阅模型让组件只关心自己需要的状态。</td><td><code>project-store.ts</code></td></tr>
+            <tr><td>④ 动作执行</td><td>UI 操作 → 可撤销 Action</td><td>ActionExecutor、History</td><td>统一建模后，撤销、AI、协作都能复用同一套语义。</td><td><code>action-executor.ts</code></td></tr>
+            <tr><td>⑤ 引擎同步</td><td>工程状态 → 引擎状态</td><td>Bridge 适配层</td><td>隔离“数据模型”和“渲染/播放实现”，便于替换后端。</td><td><code>bridges/*</code></td></tr>
+            <tr><td>⑥ 媒体接入</td><td>文件 → Blob / 帧</td><td>MediaBunny、原生解码桥</td><td>MediaBunny 负责解封装/解码与样本搬运；桌面端可走原生解码桥扩展格式。</td><td><code>packages/core/src/media/mediabunny-engine.ts</code></td></tr>
+            <tr><td>⑦ 预览渲染</td><td>时间线 → 画面与声音</td><td>WebGPU、WGSL、Web Audio</td><td>GPU 合成保证实时性；无 GPU 时 Canvas2D 兜底。</td><td><code>core/src/video</code>、<code>Preview</code></td></tr>
+            <tr><td>⑧ 后台计算</td><td>重任务 → 异步结果</td><td>Worker、WASM、ONNX</td><td>避免阻塞主线程；WASM 处理数值密集任务，ONNX 做本地推理。</td><td><code>workers/*</code></td></tr>
+            <tr><td>⑨ 持久化</td><td>工程状态 → 本地存储</td><td>IndexedDB、localStorage、SW</td><td>大对象进 IndexedDB，偏好进 localStorage，SW 负责离线。</td><td><code>auto-save.ts</code></td></tr>
+            <tr><td>⑩ 导出</td><td>工程快照 → 文件</td><td>ExportEngine、WebCodecs、MediaBunny、原生 ffmpeg</td><td>浏览器端编码后由 MediaBunny 封装；桌面端走原生 ffmpeg；导出只读工程快照。</td><td><code>export-runner.ts</code>、<code>core/src/export</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>4.3 三条分流</h3>
+        <table>
+          <thead><tr><th>分流</th><th>路径</th><th>与主干的关系</th></tr></thead>
+          <tbody>
+            <tr><td>AI 编辑流</td><td>自然语言 → LLM tool call → <code>live-host</code> → ActionExecutor</td><td>AI 不直接改 store，而是生成 action，因此可像手动编辑一样撤销。</td></tr>
+            <tr><td>协作流</td><td>本地 action → op → RoomCore 排序 → 远端重放 → ActionExecutor</td><td>同步单位是 action 而非整份工程，带宽小且冲突可控。</td></tr>
+            <tr><td>导出流</td><td>ExportDialog → ExportRunner → 编码 → 下载/队列</td><td>只读工程快照，属于数据流的“消费者”。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>4.4 容错与回退</h3>
+        <ul>
+          <li>无 WebGPU：回退 Canvas2D；CI 无 GPU 环境也依赖此路径。</li>
+          <li>WASM 加载失败：FFT/节拍检测等模块回退 JS 实现。</li>
+          <li>桌面原生后端缺失：creation 引擎回退 CPU 参考实现。</li>
+          <li>面板崩溃：PanelErrorBoundary 隔离；工程崩溃：自动保存槽位 + RecoveryDialog 恢复。</li>
+        </ul>
+      </section>
+
+      <section id="bootstrap">
+        <h2>5. 启动与路由</h2>
+        <div class="route"><strong>本节回答：</strong>从打开页面到看到编辑器，中间发生了什么？</div>
+        <table>
+          <thead><tr><th>阶段</th><th>文件</th><th>发生的事</th></tr></thead>
+          <tbody>
+            <tr><td>静态入口</td><td><code>apps/web/index.html:17-18</code></td><td>提供 <code>#root</code>，加载 <code>/src/main.tsx</code>。</td></tr>
+            <tr><td>启动准备</td><td><code>main.tsx:16-24</code></td><td>性能标记、RAW worker、E2E hook。</td></tr>
+            <tr><td>桌面判定</td><td><code>main.tsx:26-40</code></td><td>安装原生解码、路径水合、FFmpeg 后端。</td></tr>
+            <tr><td>PWA / 字体</td><td><code>main.tsx:47-52</code></td><td>注册 Service Worker，初始化自定义字体。</td></tr>
+            <tr><td>合成窗口</td><td><code>main.tsx:56-65</code></td><td>hash 含 compositionId 时渲染独立 CompositionWindow。</td></tr>
+            <tr><td>应用渲染</td><td><code>main.tsx:67-105</code></td><td>包在 AppProviders 中渲染 App。</td></tr>
+          </tbody>
+        </table>
+        <p><code>AppProviders.tsx:7-18</code> 只负责主题 class/data-theme、Tooltip context 和 <code>PluginManagerHost</code>。路由由 <code>use-router.ts:4-11</code> 定义：welcome、editor、new、templates、recent、share、motion；<code>App.tsx:276-301</code> 决定渲染 SharePage、WelcomeScreen 还是 EditorInterface。</p>
+        <div class="callout warn"><p>特性开关 <code>config/features.ts:5</code> 中 <code>MOTION_CREATOR_ENABLED = false</code>，因此 <code>#/motion</code> 会回落到标准编辑器。</p></div>
+      </section>
+
+      <section id="workspace">
+        <h2>6. Monorepo 与包依赖</h2>
+        <div class="route"><strong>本节回答：</strong>哪些包是底层，谁依赖谁，构建顺序是什么？</div>
+        <p><code>pnpm-workspace.yaml:1-3</code> 定义 <code>apps/*</code> 与 <code>packages/*</code>。根构建并不拓扑构建每个包，而是先 <code>build:wasm</code>，再构建 web；包之间多通过 <code>tsconfig.base.json:21-33</code> 的别名直接引用 TS 源码。</p>
+        <table>
+          <thead><tr><th>包</th><th>入口</th><th>职责</th></tr></thead>
+          <tbody>
+            <tr><td><code>@openreel/core</code></td><td><code>packages/core/src/index.ts</code></td><td>领域引擎总入口，聚合 timeline、editing、export、captions、motion、ai。</td></tr>
+            <tr><td><code>@openreel/agent</code></td><td><code>packages/agent/src/index.ts</code></td><td>工具注册表、LLM 协议转换、runTurn、executeTool。</td></tr>
+            <tr><td><code>@openreel/agent-runner</code></td><td><code>packages/agent-runner/src/index.ts</code></td><td>headless/CLI agent，供桌面与 MCP 场景复用。</td></tr>
+            <tr><td><code>@openreel/ui</code></td><td><code>packages/ui/src/index.ts</code></td><td>Radix/shadcn 风格基础组件。</td></tr>
+            <tr><td><code>@openreel/collab</code></td><td><code>packages/collab/src/index.ts</code></td><td>协议、冲突检测、RoomCore、ClientEngine。</td></tr>
+            <tr><td><code>@openreel/creation-bindings</code></td><td><code>packages/creation-bindings/src/index.ts</code></td><td>native → wasm → cpu 后端选择与加载。</td></tr>
+            <tr><td><code>@openreel/creation-core</code></td><td>C++ / CMake</td><td>Aurora 原生渲染核心，不在默认 web 构建链。</td></tr>
+            <tr><td><code>@openreel/fxpkg</code></td><td><code>packages/fxpkg/src/index.ts</code></td><td><code>.fxpkg</code> 制品格式、校验与编译。</td></tr>
+            <tr><td><code>@openreel/image-core</code></td><td><code>packages/image-core/src/index.ts</code></td><td>图像编辑器领域核心，独立于视频 core。</td></tr>
+          </tbody>
+        </table>
+        <div class="flow"><code>底层独立：core、ui、creation-schema、image-core、fxpkg、creation-core
+单向依赖：creation-bindings → core
+          agent → core + creation-schema
+          agent-runner → agent + core
+          collab →(dev only) core
+
+App 消费：
+  web      → agent + collab + core + ui
+  image    → image-core + ui
+  studio   → core + fxpkg + ui
+  cloud    → collab + fxpkg
+  desktop  → 重建 web renderer + Electron 主进程扩展</code></div>
+      </section>
+
+      <section id="state">
+        <h2>7. 状态管理与持久化</h2>
+        <div class="route"><strong>本节回答：</strong>工程状态放在哪？为什么刷新后还能恢复？</div>
+        <h3>7.1 Zustand 状态中心</h3>
+        <p><code>project-store.ts</code> 持有 <code>project</code>、<code>hasOpenProject</code>、<code>actionHistory</code>、<code>clipboard</code>。<code>createNewProject</code> 重置时间线/UI/引擎；<code>loadProject</code> 做 schema 迁移、序列修复、duration 修正与 bridge 同步。项目数据被切分成 media、timeline-item、track、subtitle、text-graphics、history、marker 等 slice。</p>
+        <h3>7.2 两条持久化路线</h3>
+        <div class="flow"><code>localStorage（轻量偏好）
+  openreel-ui-preferences / openreel-theme / openreel-workspaces
+  openreel-timeline-workspace / openreel-settings
+
+IndexedDB（大数据）
+  openreel-projects        项目文件与最近项目
+  openreel-autosave        30 秒间隔 / 3 槽位 / 2 秒防抖
+  media blobs              媒体二进制
+  plugin store             插件
+  export queue             导出队列</code></div>
+        <p><code>auto-save.ts:42-60</code> 序列化时剔除 blob/handle/缩略图；<code>project-store.ts:2963-3118</code> 负责脏标记、页面隐藏 flush 与恢复流程。非持久化的工作区状态由 <code>editor-workspace-store.ts</code> 和 <code>timeline-store.ts</code> 管理。</p>
+      </section>
+
+      <section id="editor-ui">
+        <h2>8. 编辑器 UI 组装</h2>
+        <div class="route"><strong>本节回答：</strong>界面各区域由谁渲染，面板之间如何协作？</div>
+        <div class="ui-diagram">
+          <div class="top">Topbar / Toolbar<span class="caption">项目菜单 · 菜单栏 · 项目名/画幅 · 保存状态 · Undo/Redo · Export</span></div>
+          <div class="main">
+            <div><strong>ActionRail</strong><span class="caption">左侧功能竖栏<br />Media / Audio / Text / Effects / Transitions / AI…</span></div>
+            <div><strong>Preview / SourceMonitor</strong><span class="caption">中央预览区<br />MulticamMonitor 作为叠加层</span></div>
+            <div><strong>Inspector 或 Changes</strong><span class="caption">右侧检查器<br />AI 对话打开时切换为更改面板</span></div>
+          </div>
+          <div class="timeline">Timeline<span class="caption">轨道 · 播放头 · 工具条 · 缩放 · 标记</span></div>
+        </div>
+        <ul>
+          <li><code>EditorInterface.tsx:134-168</code> 定义网格与初始化 hooks（compact/phone、engine、快捷键、autosave、代理、波形、预取）。</li>
+          <li><code>:506-565</code> 左侧 AssetsPanel 与中央 Preview 包在 PanelErrorBoundary 中；AI 打开时右侧 Inspector 替换为 Changes 面板。</li>
+          <li><code>:44-82</code> ChatPanel、混音器、关键帧、多机位等使用 lazy + importWithRetry；<code>:102-121</code> 空闲预取。</li>
+          <li><code>useEditorInitialization.ts:39-160</code> 依次等待 engine 与 media/playback/render/effects/transition bridge，完成后同步工程。</li>
+        </ul>
+      </section>
+
+      <section id="core">
+        <h2>9. 核心引擎 @openreel/core</h2>
+        <div class="route"><strong>本节回答：</strong>编辑规则、数据结构和可逆操作在哪里定义？</div>
+        <h3>9.1 领域分层</h3>
+        <p><code>packages/core/src/index.ts:1-320</code> 聚合：types、actions、storage、timeline、media、editing、video、audio、graphics、text、photo、motion、effects、export、captions、interchange、plugins、ai、device 等子域。</p>
+        <h3>9.2 关键数据结构</h3>
+        <table>
+          <thead><tr><th>结构</th><th>位置</th><th>要点</th></tr></thead>
+          <tbody>
+            <tr><td><code>Project</code></td><td><code>types/project.ts:88-155</code></td><td>settings、mediaLibrary、timeline、textClips、motionCompositions、creation、sequences、bins。</td></tr>
+            <tr><td><code>ProjectSettings</code></td><td><code>project.ts:34-64</code></td><td>宽高、帧率、采样率、声道、HDR、时码、PAR。</td></tr>
+            <tr><td><code>Timeline / Track</code></td><td><code>types/timeline.ts:5-28,118-164</code></td><td>tracks、subtitles、markers、masterAudioRack、audioBuses；Track 含 clips、transitions、lock、syncLock。</td></tr>
+            <tr><td><code>Action</code></td><td><code>types/actions.ts:43-48</code></td><td><code>{type,id,timestamp,params}</code>，编辑与撤销的基本单位。</td></tr>
+            <tr><td><code>TimelineAction</code></td><td><code>actions.ts:100-549</code></td><td>Project/Media/Track/Clip/Effect/Keyframe/Transition/Audio/Subtitle/Motion 等动作联合。</td></tr>
+          </tbody>
+        </table>
+        <h3>9.3 动作执行模型</h3>
+        <div class="flow"><code>UI action / Agent tool / Remote op
+        ▼
+ActionExecutor（validate → handler.apply → 记录逆动作）
+        ▼
+ActionHistory
+        ├── Project store 更新
+        ├── Bridge 同步到引擎
+        └── Collab 包装成 op</code></div>
+        <p>handler 契约是 <code>ActionHandler{apply, validate, invert}</code>，定义在 <code>actions/registry.ts:4-31</code>。能力清单 <code>capabilities/manifest.ts:42-100</code> 供 agent 自省。</p>
+        <h3>9.4 特殊资产</h3>
+        <ul>
+          <li>AssemblyScript WASM：<code>src/wasm/{fft,wav,beat-detection}</code>，失败回退 JS。</li>
+          <li>Worker：export、decode、time-stretch、person-segmentation。</li>
+          <li>WGSL：<code>video/shaders/*</code>、<code>video/upscaling/shaders/*</code>。</li>
+          <li>交换格式：<code>interchange/index.ts:1-56</code> 支持 XMEML、FCPXML、EDL、OTIO、AAF。</li>
+        </ul>
+      </section>
+
+      <section id="edit-principles">
+        <h2>10. 音视频编辑操作的技术原理</h2>
+        <div class="route"><strong>本节回答：</strong>拖动片段、裁剪、分割、贴图、加字幕、转场、变速、调色、混音，这些操作在程序里到底发生了什么？转场时声音又会不会自动跟着渐变？</div>
+
+        <h3>10.1 核心原则：编辑不修改原始媒体</h3>
+        <p>本工程采用<strong>非破坏性编辑</strong>。原始视频/音频文件始终只读，时间线上的“片段”只是对它的引用加一组参数：从哪里进、从哪里出、放在什么时间、用什么效果、速度多少、音量多少。</p>
+        <div class="flow"><code>原始媒体文件（只读）
+        │  解码
+        ▼
+帧 / 音频采样（临时）
+        │  按时间线参数重新组合
+        ▼
+预览画面 / 导出文件</code></div>
+        <p>可以把 <code>Project/Timeline</code> 理解成一张“菜谱”，把媒体文件理解成“食材”。编辑操作改的是菜谱；预览和导出才按菜谱重新做菜。</p>
+
+        <h3>10.2 三层数据模型</h3>
+        <table>
+          <thead><tr><th>层</th><th>数据</th><th>作用</th></tr></thead>
+          <tbody>
+            <tr><td>媒体层</td><td>Blob、解码后的帧、音频采样</td><td>提供真实素材内容，通常由 MediaBunny / WebCodecs / 原生解码器产生。</td></tr>
+            <tr><td>编辑层</td><td><code>Timeline</code>、<code>Track</code>、<code>Clip</code>、<code>Action</code></td><td>描述“在什么时间、用哪段素材、施加什么参数”。</td></tr>
+            <tr><td>渲染层</td><td>WebGPU 纹理 / Canvas 画面、Web Audio 节点图</td><td>把编辑层描述实时变成用户看到的画面与听到的声音。</td></tr>
+          </tbody>
+        </table>
+        <p><code>Clip</code> 上常见字段包括 <code>inPoint</code>、<code>outPoint</code>、<code>effects</code>、<code>transform</code>、<code>volume</code>、<code>keyframes</code>、<code>speed</code>、<code>colorGrading</code> 等，见 <code>packages/core/src/types/timeline.ts</code>。</p>
+
+        <h3>10.3 所有编辑操作的通用链路</h3>
+        <ol>
+          <li>用户在界面上点击、拖拽或输入；组件把事件翻译成一个语义动作。</li>
+          <li>动作进入 <code>ActionExecutor</code>：校验 → 调用 handler 修改工程 → 记录逆动作。</li>
+          <li>Zustand store 更新内存状态，界面重新渲染。</li>
+          <li>Bridge 把变化同步给渲染/播放/音频引擎，预览刷新。</li>
+          <li>需要落盘时写 IndexedDB；需要成片时进入导出引擎。</li>
+        </ol>
+        <p>因此，AI 编辑、多人协作与手动编辑走的是同一条路：最终都变成 <code>Action</code>。</p>
+
+        <h3>10.4 常见操作背后的技术原理</h3>
+        <table>
+          <thead><tr><th>操作</th><th>程序里发生了什么</th><th>关键点</th></tr></thead>
+          <tbody>
+            <tr><td>选择 / 移动片段</td><td>改变片段在轨道上的起始时间。</td><td>不复制媒体；只改时间坐标。</td></tr>
+            <tr><td>分割 Split</td><td>把一个 <code>Clip</code> 拆成两个，分别设置新的 <code>inPoint/outPoint</code>。</td><td>源文件没有被切开；只是边界变了。</td></tr>
+            <tr><td>修剪 Trim</td><td>调整 <code>inPoint</code> 或 <code>outPoint</code>，改变使用源的哪一段。</td><td>对应 action 如 <code>clip/trim</code>、<code>clip/trimToPlayhead</code>。</td></tr>
+            <tr><td>删除 / 波纹删除</td><td>从轨道列表移除片段；波纹删除还会把后续片段整体前移。</td><td>普通删除留空，波纹删除闭合空隙。</td></tr>
+            <tr><td>复制 / 粘贴</td><td>把片段描述（含效果和参数）序列化到剪贴板，再写入目标时间。</td><td>复制的是“引用 + 参数”，不是媒体二进制。</td></tr>
+            <tr><td>转场</td><td>在两个片段接缝处放置 <code>Transition</code>，渲染时按进度混合前后帧。</td><td>转场是渲染规则，不是写回文件。</td></tr>
+            <tr><td>变速</td><td>把时间线时间映射到不同的源时间，必要时做帧采样/插值。</td><td>音频还要做时间拉伸与音高修正，见 <code>speed</code>、<code>speedKeyframes</code>。</td></tr>
+            <tr><td>关键帧 / 动画</td><td>在不同时间点保存属性值，渲染时对中间帧做插值。</td><td>位置、缩放、透明度、音量、效果参数都可以动画化。</td></tr>
+            <tr><td>文字 / 字幕</td><td>把文字与样式作为图层叠加到画面；字幕可从 SRT/VTT 或转录生成。</td><td>导出时还可选把 CEA-608 字幕写进 H.264 SEI。</td></tr>
+            <tr><td>特效 / 调色</td><td>给片段挂上 <code>Effect</code> 或 <code>colorGrading</code> 参数；渲染器逐帧应用。</td><td>视频走 WGSL 着色器或 Canvas 滤镜，音频走 Web Audio 节点。</td></tr>
+            <tr><td>音频混音</td><td>每个轨道/片段形成 Web Audio 节点：增益、声像、EQ、压缩、自动化。</td><td>播放实时计算；导出前用 OfflineAudioContext 离线混成一条或多条音轨。</td></tr>
+            <tr><td>多机位</td><td>多个轨道共享同一时间轴；每个时刻选择哪个轨道作为活动画面。</td><td>切换的是“视角源”，片段本身仍未改动。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>10.5 贴图、字幕与视频转场的专门机制</h3>
+        <p>前面把编辑操作看成“改参数”，这三类功能最容易让人误以为是直接改画面文件。实际上它们仍然是<strong>独立数据 + 渲染时叠加/合成</strong>：贴图是 overlay 图层，字幕是按时间显示或导出的文本轨，转场是两个相邻片段在接缝处的合成规则。</p>
+
+        <h4 style="margin:16px 0 8px;color:var(--brand2)">贴图 / 贴纸：独立图形图层，不是视频滤镜</h4>
+        <div class="flow"><code>用户选择贴纸 / Emoji
+        │  在播放头位置插入 StickerClip
+        ▼
+Project.stickerClips（startTime + duration + transform + keyframes）
+        │  每帧按时间筛选活跃贴纸
+        ▼
+GraphicsEngine 用 Canvas 2D 画出贴纸
+        │  按轨道叠加到主画面
+        ▼
+预览画面 / 导出帧</code></div>
+        <p>贴纸的数据不在 <code>Clip.effects</code> 里，而在 <code>Project.stickerClips</code>。基础结构 <code>GraphicClip</code> 包含 <code>trackId</code>、<code>startTime</code>、<code>duration</code>、<code>transform</code>、<code>keyframes</code>、<code>blendMode</code> 等；<code>StickerClip</code> 再补上 <code>imageUrl</code>。程序在某一时刻用 <code>time &gt;= startTime &amp;&amp; time &lt; startTime + duration</code> 找到活跃贴纸，用 <code>time - startTime</code> 得到贴纸自己的本地时间，再应用关键帧动画、缩放、旋转和透明度。</p>
+        <p class="small">源码入口：<code>packages/core/src/graphics/types.ts:7-21</code>、<code>:127-132</code>；<code>packages/core/src/graphics/graphics-engine.ts:434-481</code>、<code>:730-751</code>；<code>packages/core/src/video/video-engine.ts:2376-2389</code>、<code>:2522-2544</code>；<code>apps/web/src/components/editor/inspector/StickerPickerPanel.tsx:109-190</code>；<code>apps/web/src/stores/project/text-graphics-slice.ts:482-496</code>。未找到贴纸走 WebGPU 的渲染路径；核心实现是 Canvas 2D overlay。</p>
+
+        <h4 style="margin:16px 0 8px;color:var(--brand2)">字幕：一份时间文本，多种消费方式</h4>
+        <p>字幕的核心不是“把字画到视频上”，而是维护一组带时间区间的文本条目。<code>Timeline.subtitles</code> 中每条字幕通常有 <code>text</code>、<code>startTime</code>、<code>endTime</code>、<code>style</code>，还可带逐词时间 <code>words</code>、说话人和语言。预览时用左闭右开区间 <code>startTime &lt;= time &lt; endTime</code> 判断当前应该显示哪几条，导出时则根据设置走三条不同路线：</p>
+        <table>
+          <thead><tr><th>路线</th><th>程序里发生了什么</th><th>适用场景</th></tr></thead>
+          <tbody>
+            <tr><td>Burn-in 烧录</td><td>在逐帧渲染末尾用 <code>drawCaption()</code> 把字幕画进画面。</td><td>所有播放器都能看到，但不能关闭。</td></tr>
+            <tr><td>Sidecar 旁文件</td><td>导出 SRT/VTT/TTML/SCC/STL 等独立文件。</td><td>需要可关闭字幕、多语言分发。</td></tr>
+            <tr><td>Embedded 内嵌</td><td>浏览器 MP4 用 WebVTT，桌面 MP4 用 mov_text；CEA-608 是独立 SEI 后处理，把 <code>cc_data</code> 插入 H.264 NAL。</td><td>播放器需要原生字幕轨或广播兼容字幕。</td></tr>
+          </tbody>
+        </table>
+        <p>SRT/VTT 导入导出由 <code>SubtitleEngine</code> 与 <code>caption-formats.ts</code> 完成；UI 可从 AI 面板导入字幕文本，也可在字幕检查器和 Caption Editor 里直接编辑。导出端的 <code>embedCea608Sei()</code> 是在已有 MP4/MOV 上插入 CEA-608 SEI，属于<strong>文件级后处理</strong>，不是逐帧烧录。</p>
+        <p class="small">源码入口：<code>packages/core/src/types/timeline.ts:5-8</code>、<code>:531-595</code>；<code>packages/core/src/text/subtitle-engine.ts:80-107</code>、<code>:191-366</code>；<code>packages/core/src/captions/caption-formats.ts</code>；<code>packages/core/src/captions/caption-export.ts:24-223</code>；<code>packages/core/src/video/video-engine.ts:2589-2608</code>；<code>packages/core/src/export/caption-sei-embed.ts</code>；<code>apps/web/src/stores/project/subtitle-slice.ts:121-210</code>。</p>
+
+        <h4 style="margin:16px 0 8px;color:var(--brand2)">视频转场：同一时刻取两路帧，再按进度合成</h4>
+        <p>转场保存在 <code>Track.transitions</code> 中，引用两个相邻片段 <code>clipAId/clipBId</code>，或某一片段的边缘 <code>edge: "in" | "out"</code>。引擎要求两片段在同一轨道且相邻，容差约 1 毫秒。在时间 <code>T</code> 落入转场窗口时，程序同时解码 A 与 B 在 <code>T</code> 这一时刻的画面，计算进度 <code>progress</code>，再用 <code>TransitionEngine</code> 合成一帧输出。</p>
+        <div class="flow"><code>时间 T 落入转场窗口
+        │
+        ├── 解码 A 在 T 时刻的帧
+        └── 解码 B 在 T 时刻的帧
+        │
+        ▼
+计算 progress（0 → 1）+ 缓动曲线
+        │
+        ▼
+TransitionEngine：crossfade / wipe / slide / push / zoom / ...
+        │
+        ▼
+输出这一帧的转场画面</code></div>
+        <p>常见类型包括 <code>crossfade</code>、<code>dipToBlack</code>、<code>dipToWhite</code>、<code>wipe</code>、<code>slide</code>、<code>push</code>、<code>zoom</code>、<code>glitch</code>、<code>flash</code> 等 24 种。默认两片段转场以切点为中心，窗口为 <code>[切点 - duration/2, 切点 + duration/2]</code>；也可由 <code>params.alignment</code> 改成完全在切点前或切点后。预览和导出最终都复用 <code>VideoEngine.renderFrame()</code> 里的活跃转场查找与渲染，所以不是两套完全不同的算法。</p>
+        <p class="small">源码入口：<code>packages/core/src/types/timeline.ts:137</code>、<code>:511-521</code>；<code>packages/core/src/types/effects.ts:571-597</code>；<code>packages/core/src/video/transition-engine.ts:86-257</code>、<code>:1542-1573</code>；<code>packages/core/src/video/video-engine.ts:2618-2655</code>、<code>:2754-2846</code>；<code>apps/web/src/bridges/transition-bridge.ts:117-210</code>。转场核心是 OffscreenCanvas 2D，<code>renderTransition()</code> 返回中明确标记 <code>gpuAccelerated: false</code>；未找到 WebGPU transition renderer。</p>
+
+        <h4 style="margin:16px 0 8px;color:var(--brand2)">转场如何确保音画同步</h4>
+        <p>这里要区分两个概念：<strong>时间对齐</strong>是默认存在的，<strong>音频交叉淡化</strong>不是默认存在的。转场使用的是同一条时间线秒轴：画面从 A/B 两路按 <code>T</code> 取帧，音频 clip 也按 <code>T</code> 映射到各自的源时间。因此播放头、画面转场进度、音频调度和导出帧都锚定在同一个 timeline 时间上，不会各走各的时钟。</p>
+        <p>但是，视频做了 crossfade 并不代表声音自动 crossfade。源码中音频淡变只有在 <code>transition.params.audioFade === true</code> 时才会启用；默认 <code>false</code>，且默认转场参数不会自动写入该开关。启用后，对 clip-to-clip 转场，A 的尾部做 <code>duration / 2</code> 的 fade out，B 的头部做 <code>duration / 2</code> 的 fade in；对单 clip edge 转场使用完整 <code>duration</code>。音频淡变按 clip edge 锚定，并不复用视频转场的 alignment 窗口。</p>
+        <table>
+          <thead><tr><th>场景</th><th>画面</th><th>声音</th></tr></thead>
+          <tbody>
+            <tr><td>只加视频转场</td><td>按转场窗口混合两路画面。</td><td>没有自动 crossfade，声音按各自 clip 的时间、音量与自动化继续播放。</td></tr>
+            <tr><td>开启 <code>audioFade</code></td><td>仍按视频转场规则。</td><td>A 尾部淡出、B 头部淡入；时长与视频转场对齐到同一 clip edge，但 alignment 规则不同。</td></tr>
+            <tr><td>实时预览</td><td><code>requestAnimationFrame</code> 驱动画面。</td><td><code>AudioContext.currentTime</code> 作为时钟参考；音频节点提前调度并补偿路由/效果延迟。</td></tr>
+            <tr><td>导出</td><td>按 <code>time = frame / frameRate</code> 固定步长逐帧求值。</td><td>音频在同一 <code>exportStart/exportDuration</code> 范围内离线混音，再编码封装。</td></tr>
+          </tbody>
+        </table>
+        <p class="small">源码入口：<code>packages/core/src/audio/transition-audio-fades.ts:8-27</code>；<code>packages/core/src/audio/clip-fade-envelope.ts:22-143</code>；<code>packages/core/src/audio/audio-engine.ts:491-534</code>、<code>:1073-1088</code>；<code>packages/core/src/playback/master-timeline-clock.ts:42-49</code>、<code>:118-127</code>；<code>packages/core/src/export/export-engine.ts:299</code>、<code>:443-457</code>、<code>:529</code>。</p>
+
+        <h3>10.6 预览与导出是两次不同的求值</h3>
+        <table>
+          <thead><tr><th>维度</th><th>预览</th><th>导出</th></tr></thead>
+          <tbody>
+            <tr><td>目标</td><td>实时反馈，交互优先。</td><td>帧准确、可重复、可交付。</td></tr>
+            <tr><td>时间驱动</td><td><code>requestAnimationFrame</code> + 播放时钟。</td><td>按固定帧步长逐帧推进。</td></tr>
+            <tr><td>帧来源</td><td>解码帧缓存 + 前向游标。</td><td><code>ExportFrameDecoder</code> 按时间戳取帧。</td></tr>
+            <tr><td>渲染</td><td>WebGPU 优先，必要时 Canvas2D 回退，可丢帧。</td><td>严格逐帧渲染，不丢帧。</td></tr>
+            <tr><td>输出</td><td>屏幕画面与声音。</td><td>WebCodecs/MediaBunny 或原生 ffmpeg 生成文件。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>10.7 音画同步是怎么做到的</h3>
+        <p>工程内部时间统一用<strong>秒（浮点数）</strong>表示。视频按帧率换算成帧号，音频按采样率换算成采样点索引。播放时浏览器用 <code>requestAnimationFrame</code> 驱动画面，用 <code>AudioContext.currentTime</code> 作为音频时钟参考；导出时不再依赖实时时钟，而是按固定时间步长逐帧计算。转场本身也遵守这套统一时间轴；转场期间是否让声音一起淡入淡出，则取决于 <code>audioFade</code> 开关，见 10.5。</p>
+
+        <h3>10.8 为什么采用这种设计</h3>
+        <ul>
+          <li><strong>可撤销</strong>：每步操作都有逆动作，数据没有被真正破坏。</li>
+          <li><strong>可协作</strong>：同步的是小体积的 action，而不是整段视频。</li>
+          <li><strong>可被 AI 调用</strong>：工具调用最终也生成 action。</li>
+          <li><strong>预览快</strong>：只重新计算受影响的部分，媒体仍从缓存读取。</li>
+          <li><strong>导出可控</strong>：同一份编辑描述可以导出不同分辨率、码率和格式。</li>
+        </ul>
+
+        <h3>10.9 常见误解</h3>
+        <table>
+          <thead><tr><th>误解</th><th>实际情况</th></tr></thead>
+          <tbody>
+            <tr><td>分割会把 MP4 切成两个文件</td><td>不会。只是把时间线上的引用拆成两段。</td></tr>
+            <tr><td>加转场会修改原视频</td><td>不会。转场只是渲染时的混合规则。</td></tr>
+            <tr><td>视频转场会自动让声音交叉淡化</td><td>不会。<code>audioFade</code> 默认关闭；需要显式打开才会让 A 尾部淡出、B 头部淡入。</td></tr>
+            <tr><td>贴图 / 字幕会写进源视频</td><td>不会。非烧录导出时它们是独立图层/文本轨；只有烧录或导出求值才会进入像素。</td></tr>
+            <tr><td>调色后源文件被覆盖</td><td>不会。调色参数存在 Clip 上。</td></tr>
+            <tr><td>音量调整会改写音频波形</td><td>播放时是增益节点；导出时才烘焙进结果。</td></tr>
+            <tr><td>预览和导出看到的一样</td><td>可能不同。预览可丢帧并受 GPU 影响，导出是逐帧精确计算。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>10.10 关键源码入口</h3>
+        <table>
+          <thead><tr><th>主题</th><th>文件</th></tr></thead>
+          <tbody>
+            <tr><td>Clip / Timeline 数据结构</td><td><code>packages/core/src/types/timeline.ts</code></td></tr>
+            <tr><td>Action 定义</td><td><code>packages/core/src/types/actions.ts</code></td></tr>
+            <tr><td>动作执行与撤销</td><td><code>packages/core/src/actions/action-executor.ts</code></td></tr>
+            <tr><td>工程状态</td><td><code>apps/web/src/stores/project-store.ts</code></td></tr>
+            <tr><td>渲染同步</td><td><code>apps/web/src/bridges/render-bridge.ts</code></td></tr>
+            <tr><td>贴纸 / 图形图层</td><td><code>packages/core/src/graphics/graphics-engine.ts</code>、<code>packages/core/src/graphics/sticker-library.ts</code></td></tr>
+            <tr><td>字幕解析 / 导出</td><td><code>packages/core/src/text/subtitle-engine.ts</code>、<code>packages/core/src/captions/caption-export.ts</code>、<code>packages/core/src/export/caption-sei-embed.ts</code></td></tr>
+            <tr><td>转场合成</td><td><code>packages/core/src/video/transition-engine.ts</code>、<code>apps/web/src/bridges/transition-bridge.ts</code></td></tr>
+            <tr><td>转场音频淡变</td><td><code>packages/core/src/audio/transition-audio-fades.ts</code>、<code>packages/core/src/audio/clip-fade-envelope.ts</code></td></tr>
+            <tr><td>视频渲染</td><td><code>packages/core/src/video/video-engine.ts</code></td></tr>
+            <tr><td>音频路由与混音</td><td><code>packages/core/src/audio/audio-routing-graph.ts</code>、<code>packages/core/src/audio/mixdown-cache.ts</code></td></tr>
+            <tr><td>导出求值</td><td><code>packages/core/src/export/export-engine.ts</code></td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout brand2">
+          <p><strong>一句话总结：</strong>这个工程把“媒体的内容”和“对媒体的操作”彻底分开。内容留在文件里，操作变成可撤销的参数；贴图、字幕和转场都在渲染时按同一时间轴求值；预览是快速近似，导出是精确求值。</p>
+        </div>
+      </section>
+
+      <section id="agent-collab-services">
+        <h2>11. Agent、协作与服务层</h2>
+        <div class="route"><strong>本节回答：</strong>AI 和多人协作如何复用编辑能力？服务层还负责什么？</div>
+        <h3>11.1 AI Agent</h3>
+        <p><code>packages/agent</code> 注册约 452 个工具；<code>registry.ts</code> 提供 <code>getTool/listTools/toAnthropicTools/toOpenAITools/toMcpTools</code>；<code>executor.ts</code> 解析 clipIndex/atSec 并调用 handler；<code>tool-router.ts</code> 默认最多选 120 个工具；<code>runTurn</code> 驱动多轮工具调用。</p>
+        <p>Web 接入链路：<code>ChatPanel</code> → <code>chat-store.ts:281-309</code> 构造 EditingSession → BYOK LLM → <code>agent.runTurn</code> → 事件映射成工具卡 → <code>live-host.ts</code> 落到 ActionExecutor。</p>
+        <h3>11.2 协作</h3>
+        <p>同步单位是 core 的 undoable action；一个 op 包含多个 action。<code>WireOp</code> 含 opId、baseSeq、actions、touches、locks；<code>touches.ts</code> 做冲突键映射；<code>RoomCore</code> 排序、软锁、presence；<code>ClientEngine</code> 维护 base+live 重放；云端 <code>room-do.ts</code> 用 Durable Object 持久化房间。</p>
+        <h3>11.3 Web 服务层速查</h3>
+        <table>
+          <thead><tr><th>领域</th><th>关键文件</th><th>作用</th></tr></thead>
+          <tbody>
+            <tr><td>AI / Agent</td><td><code>services/agent/*</code>、<code>kieai/*</code></td><td>live-host、工具定义、LLM 直连、MCP、导出任务、图像生成。</td></tr>
+            <tr><td>字幕</td><td><code>caption-source.ts</code>、<code>caption-sei.ts</code></td><td>SRT/VTT/SEI/转录命令。</td></tr>
+            <tr><td>字体</td><td><code>font-embedding.ts</code>、<code>project-fonts.ts</code></td><td>字体发现、嵌入与缺失提示。</td></tr>
+            <tr><td>导出</td><td><code>export-runner.ts</code>、<code>export-queue/*</code></td><td>导出主流程与队列。</td></tr>
+            <tr><td>媒体处理</td><td><code>proxy-ingest.ts</code>、<code>native-decode.ts</code></td><td>代理、RAW、原生解码。</td></tr>
+            <tr><td>插件</td><td><code>plugin-service.ts</code></td><td>浏览器 IndexedDbPluginStore / 桌面原生插件。</td></tr>
+            <tr><td>API 代理</td><td><code>api-proxy.ts</code></td><td>dev 直连、prod 走 <code>/api/proxy</code>、桌面走主进程桥。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="crosscut">
+        <h2>12. 横切机制</h2>
+        <div class="route"><strong>本节回答：</strong>哪些机制贯穿多个模块，容易在排查时忽略？</div>
+        <ul>
+          <li><strong>懒加载与预取</strong>：<code>services/lazy-engines.ts</code> 让约 1.4 MB 引擎不进入启动 chunk；<code>editor-loader.ts</code> 预热编辑器。</li>
+          <li><strong>多端适配</strong>：<code>useCompactEditor.ts</code>（≤1366px 触摸）、<code>usePhoneEditor.ts</code>（≤600px 触摸）、<code>MobileBlocker.tsx</code> 兜底。</li>
+          <li><strong>主题</strong>：<code>theme-store.ts</code> 支持 light/dark/auto，<code>AppProviders</code> 同步 DOM。</li>
+          <li><strong>独立合成窗口</strong>：<code>linked-comp-*</code> 服务处理 compositionId 模式。</li>
+          <li><strong>PWA</strong>：生产自动注册 Service Worker；dev 需 <code>VITE_ENABLE_SW</code>。</li>
+        </ul>
+        <div class="callout danger">
+          <p><strong>i18n 现状：</strong>当前仓库没有 UI 国际化框架、语言包或切换入口；界面文案硬编码英文。<code>settings-store</code> 的 <code>language: "en"</code> 不是界面语言开关。详见 <a href="./界面英文菜单对照.html">英文菜单对照</a>。</p>
+        </div>
+      </section>
+
+      <section id="testing">
+        <h2>13. 测试与质量保障</h2>
+        <div class="route"><strong>本节回答：</strong>改动后怎么验证？有哪些自动化门槛？</div>
+        <table>
+          <thead><tr><th>类型</th><th>入口</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>单元测试</td><td><code>apps/web/vitest.config.ts:23-55</code></td><td>jsdom；core/agent/collab 通过源码别名引入。</td></tr>
+            <tr><td>E2E</td><td><code>playwright.config.ts:22-92</code></td><td>端口 5391；gpu / fallback-nowebgpu / fallback-software 三项目。</td></tr>
+            <tr><td>E2E 分片</td><td><code>e2e/shard-plan.mjs</code></td><td>CI 分 10 片，使用 Google Chrome。</td></tr>
+            <tr><td>Soak</td><td><code>playwright.soak.config.ts</code></td><td>端口 5392，要求生产包。</td></tr>
+            <tr><td>包体与性能</td><td><code>bundle:budget</code> / <code>perf:gate</code></td><td>检查 chunk 预算与 400 clip 时间线交互的渲染次数。</td></tr>
+            <tr><td>桌面 E2E</td><td><code>apps/desktop/package.json:26-34</code></td><td>ingest、ProRes、HDR、项目、MCP 等真实 Electron 套件。</td></tr>
+          </tbody>
+        </table>
+        <p class="small">CI 使用 Node 22、<code>pnpm install --frozen-lockfile</code>，并安装 ffmpeg 与 libxml2-utils；相关测试在依赖缺失时会失败而非跳过。</p>
+      </section>
+
+      <section id="reading-map">
+        <h2>14. 深入阅读与修改索引</h2>
+        <div class="route"><strong>本节回答：</strong>我要改某个东西，应该从哪里下手？</div>
+        <p class="small">如果不熟悉 Web 开发，建议先看 <a href="#browser-role">第 2 章</a>；如果想先理解具体编辑操作，看 <a href="#edit-principles">第 10 章</a>；如果已熟悉编解码算法，建议先看 <a href="#codec-guide">第 17 章</a>，它按“解封装 → 解码 → 编码 → 封装 → 桌面原生”重新组织了阅读顺序。</p>
+        <h3>14.1 分阶段阅读路线</h3>
+        <table>
+          <thead><tr><th>时间</th><th>阅读顺序</th><th>目标</th></tr></thead>
+          <tbody>
+            <tr><td>30 分钟</td><td><code>README</code> → <code>package.json</code> → <code>index.html</code> → <code>main.tsx</code> → <code>App.tsx</code></td><td>知道启动的是什么、首屏如何分支。</td></tr>
+            <tr><td>2 小时</td><td><code>use-router</code> → <code>project-store</code> → <code>project.ts</code> → <code>action-executor</code> → <code>EditorInterface</code></td><td>理解“操作如何变成 action 并渲染”。</td></tr>
+            <tr><td>半天</td><td><code>export-runner</code> → <code>auto-save</code> → <code>project-manager</code> → <code>api-proxy</code></td><td>掌握导出、持久化与在线边界。</td></tr>
+            <tr><td>1 天</td><td><code>agent/registry</code> → <code>chat-store</code> → <code>live-host</code> → <code>collab/protocol</code> → <code>room-core</code></td><td>理解 AI 与协作如何复用动作模型。</td></tr>
+            <tr><td>1 周</td><td>WGSL、workers、creation-core、fxpkg、E2E、perf budgets</td><td>进入性能、原生与专项领域。</td></tr>
+          </tbody>
+        </table>
+        <h3>14.2 修改场景索引</h3>
+        <table>
+          <thead><tr><th>要改什么</th><th>优先看</th><th>连带检查</th></tr></thead>
+          <tbody>
+            <tr><td>按钮/菜单文案</td><td><code>EditorMenuBar.tsx</code>、<code>Toolbar.tsx</code></td><td><a href="./界面英文菜单对照.html">英文菜单对照</a>、E2E 选择器</td></tr>
+            <tr><td>新增面板</td><td><code>EditorActionRail.tsx</code>、<code>EditorInterface.tsx</code></td><td><code>editor-workspace-store.ts</code>、懒加载与错误边界</td></tr>
+            <tr><td>改快捷键</td><td><code>services/keyboard-shortcuts.ts</code></td><td><code>KeyboardShortcutsOverlay.tsx</code>、测试</td></tr>
+            <tr><td>加效果/转场</td><td><code>EffectsTransitionsPanel.tsx</code></td><td><code>core/src/effects</code>、<code>@openreel/ui</code></td></tr>
+            <tr><td>加导出格式</td><td><code>ExportDialog.tsx</code>、<code>export-presets.ts</code></td><td><code>core/src/export</code>、浏览器/桌面能力差异</td></tr>
+            <tr><td>改 AI 工具</td><td><code>agent/src/registry.ts</code></td><td><code>editing-tools.ts</code>、<code>live-host.ts</code></td></tr>
+            <tr><td>改协作</td><td><code>collab/src/protocol.ts</code>、<code>room-core.ts</code></td><td><code>apps/cloud/src/collab</code></td></tr>
+            <tr><td>改持久化</td><td><code>auto-save.ts</code>、<code>project-manager.ts</code></td><td><code>media-storage.ts</code>、恢复流程</td></tr>
+            <tr><td>改渲染</td><td><code>core/src/video</code>、<code>shaders/*.wgsl</code></td><td>Canvas2D 回退、perf gate</td></tr>
+            <tr><td>改启动/构建</td><td><code>vite.config.ts</code>、根 <code>package.json</code></td><td><code>wrangler.toml</code>、CI</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="risks">
+        <h2>15. 风险与维护提示</h2>
+        <div class="route"><strong>本节回答：</strong>哪些地方容易踩坑？</div>
+        <ul>
+          <li><strong>超大文件</strong>：<code>agent/src/registry.ts</code> 超过三万行，<code>project-store.ts</code> 约 160 KB；修改前先搜索定位。</li>
+          <li><strong>README 部分过时</strong>：README 写 React 18，实际 React 19；快速开始未提 <code>pnpm build:wasm</code>。</li>
+          <li><strong>脚本路径不一致</strong>：<code>start.sh:15</code> 检查的 WASM 目录与实际产物目录不一致。</li>
+          <li><strong>外部命令是硬依赖</strong>：完整测试需要 ffmpeg 与 xmllint。</li>
+          <li><strong>浏览器能力差异</strong>：WebGPU 有 Canvas2D 回退，但 WebCodecs/SharedArrayBuffer 仍是关键能力。</li>
+          <li><strong>无 UI i18n</strong>：产品能力缺口，不是部署问题。</li>
+        </ul>
+      </section>
+
+      <section id="technology">
+        <h2>16. 核心技术详解</h2>
+        <div class="route"><strong>本节回答：</strong>每项技术是什么、在本工程做什么、深入读哪里、有哪些边界？</div>
+        <p class="small">点击展开。建议先看“工程职责”和“深入入口”，再决定是否阅读原理资料。</p>
+
+        <h3>16.1 应用与构建</h3>
+        <details open>
+          <summary>React 19 + TypeScript</summary>
+          <ul>
+            <li><strong>是什么</strong>：React 是声明式 UI 库，TypeScript 提供静态类型。</li>
+            <li><strong>工程职责</strong>：组件树、事件处理、面板拆分、跨包类型约束。</li>
+            <li><strong>深入入口</strong>：<code>main.tsx</code>、<code>App.tsx</code>、<code>components/editor/EditorInterface.tsx</code>。</li>
+            <li><strong>注意</strong>：大型组件优先按区域拆分，避免无关重渲染。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Vite + 路径别名</summary>
+          <ul>
+            <li><strong>是什么</strong>：前端构建工具，支持 dev server、HMR、代码分割。</li>
+            <li><strong>工程职责</strong>：开发服务器、生产打包；通过 alias 把 workspace 包指向源码。</li>
+            <li><strong>深入入口</strong>：<code>apps/web/vite.config.ts</code>、<code>tsconfig.base.json</code>。</li>
+            <li><strong>注意</strong>：dev/preview 注入 COOP/COEP；生产由 <code>_headers</code> 提供。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>pnpm workspace</summary>
+          <ul>
+            <li><strong>是什么</strong>：多包管理的 workspace 方案。</li>
+            <li><strong>工程职责</strong>：统一管理 apps 与 packages，应用 ffmpeg 补丁和白名单构建。</li>
+            <li><strong>深入入口</strong>：<code>pnpm-workspace.yaml</code>、根 <code>package.json</code>。</li>
+            <li><strong>注意</strong>：使用 <code>--frozen-lockfile</code> 可避免 CI 与本地漂移。</li>
+          </ul>
+        </details>
+
+        <h3>16.2 状态与领域模型</h3>
+        <details>
+          <summary>Zustand</summary>
+          <ul>
+            <li><strong>是什么</strong>：轻量状态管理库，基于 hook 与 selector。</li>
+            <li><strong>工程职责</strong>：工程、时间线、UI、设置等状态中心；通过 slice 拆分大型 store。</li>
+            <li><strong>深入入口</strong>：<code>stores/project-store.ts</code>、<code>stores/project/*.ts</code>。</li>
+            <li><strong>注意</strong>：组件只订阅需要的最小状态，避免全量重渲染。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>ActionExecutor / ActionHistory</summary>
+          <ul>
+            <li><strong>是什么</strong>：领域层动作执行与历史记录机制。</li>
+            <li><strong>工程职责</strong>：所有编辑操作统一建模；validate、apply、invert 支持撤销/重做。</li>
+            <li><strong>深入入口</strong>：<code>core/src/actions/action-executor.ts</code>、<code>action-history.ts</code>。</li>
+            <li><strong>注意</strong>：AI 与协作最终都落到这里，新增编辑能力要同时考虑逆动作。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Project / Timeline 数据模型</summary>
+          <ul>
+            <li><strong>是什么</strong>：编辑器领域的静态数据结构。</li>
+            <li><strong>工程职责</strong>：描述工程设置、轨道、片段、字幕、标记、音频机架等。</li>
+            <li><strong>深入入口</strong>：<code>core/src/types/project.ts</code>、<code>timeline.ts</code>、<code>actions.ts</code>。</li>
+            <li><strong>注意</strong>：改结构需考虑 schema 迁移与自动保存恢复。</li>
+          </ul>
+        </details>
+
+        <h3>16.3 媒体、渲染与计算</h3>
+        <details>
+          <summary>WebCodecs + MediaBunny</summary>
+          <ul>
+            <li><strong>是什么</strong>：MediaBunny 负责解封装/封装与样本搬运；本工程主要用 WebCodecs 做视频编码。</li>
+            <li><strong>工程职责</strong>：本地解码走 MediaBunny，预览帧转 Canvas/ImageBitmap；导出编码走 WebCodecsBackend，封装回 MediaBunny。</li>
+            <li><strong>深入入口</strong>：<code>packages/core/src/media/mediabunny-engine.ts</code>、<code>packages/core/src/export/webcodecs-backend.ts</code>。</li>
+            <li><strong>注意</strong>：浏览器编解码器支持因平台而异，专业格式依赖桌面 ffmpeg。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>WebGPU + WGSL + Canvas2D</summary>
+          <ul>
+            <li><strong>是什么</strong>：WebGPU 是 GPU 图形/计算 API，WGSL 是其着色器语言。</li>
+            <li><strong>工程职责</strong>：实时合成、模糊、变换、放大等预览效果。</li>
+            <li><strong>深入入口</strong>：<code>core/src/video/shaders/*.wgsl</code>、<code>core/src/video</code>。</li>
+            <li><strong>注意</strong>：无 WebGPU adapter 时回退 Canvas2D，功能可用但性能下降。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Web Audio API</summary>
+          <ul>
+            <li><strong>是什么</strong>：浏览器音频图与实时处理 API。</li>
+            <li><strong>工程职责</strong>：多轨播放、混音、EQ、压缩、分析与节拍检测。</li>
+            <li><strong>深入入口</strong>：<code>core/src/audio</code>、<code>audio-mixer</code> 组件。</li>
+            <li><strong>注意</strong>：播放链路与导出音频链路是两条路径，调试时要区分。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Web Worker</summary>
+          <ul>
+            <li><strong>是什么</strong>：浏览器后台线程。</li>
+            <li><strong>工程职责</strong>：导出、解码、Whisper、RAW、运动跟踪等任务。</li>
+            <li><strong>深入入口</strong>：<code>apps/web/src/workers</code>、<code>packages/core/src/video/parallel-frame-decoder.ts</code>。</li>
+            <li><strong>注意</strong>：与主线程通过消息传递，调试需看 worker 上下文。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>AssemblyScript WASM</summary>
+          <ul>
+            <li><strong>是什么</strong>：用 TypeScript 风格语法编译到 WebAssembly。</li>
+            <li><strong>工程职责</strong>：FFT、WAV 解析、节拍检测。</li>
+            <li><strong>深入入口</strong>：<code>packages/core/src/wasm/*/assembly/index.ts</code>。</li>
+            <li><strong>注意</strong>：产物被 git 忽略，新克隆必须 <code>pnpm build:wasm</code>；失败有 JS 回退。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>ONNX Runtime Web / Transformers.js</summary>
+          <ul>
+            <li><strong>是什么</strong>：浏览器端本地模型推理运行时。</li>
+            <li><strong>工程职责</strong>：Whisper 字幕、人物分割等 AI 能力。</li>
+            <li><strong>深入入口</strong>：<code>workers/whisper-worker.ts</code>、<code>core/src/ai/*</code>。</li>
+            <li><strong>注意</strong>：模型需要下载，首次使用耗时；媒体留在本地是产品设计目标。</li>
+          </ul>
+        </details>
+
+        <h3>16.4 存储、服务与桌面</h3>
+        <details>
+          <summary>IndexedDB + localStorage</summary>
+          <ul>
+            <li><strong>是什么</strong>：浏览器本地存储；前者适合结构化大数据，后者适合小偏好。</li>
+            <li><strong>工程职责</strong>：项目、自动保存、媒体 Blob、导出队列 vs 主题、布局、设置。</li>
+            <li><strong>深入入口</strong>：<code>auto-save.ts</code>、<code>project-manager.ts</code>、各 store 的 persist 配置。</li>
+            <li><strong>注意</strong>：改持久化结构要考虑迁移与恢复。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Service Worker / PWA</summary>
+          <ul>
+            <li><strong>是什么</strong>：浏览器后台脚本，用于缓存与离线。</li>
+            <li><strong>工程职责</strong>：静态资源缓存、更新检查、离线可用。</li>
+            <li><strong>深入入口</strong>：<code>services/service-worker.ts</code>、<code>public/sw.js</code>。</li>
+            <li><strong>注意</strong>：生产自动注册，dev 需 <code>VITE_ENABLE_SW</code>。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Cloudflare Pages Function + Worker + Durable Object</summary>
+          <ul>
+            <li><strong>是什么</strong>：边缘函数、Workers 运行时与有状态对象。</li>
+            <li><strong>工程职责</strong>：<code>/api/proxy</code>、协作房间、市场与 crash API。</li>
+            <li><strong>深入入口</strong>：<code>apps/web/functions/api/proxy</code>、<code>apps/cloud/src/collab/room-do.ts</code>。</li>
+            <li><strong>注意</strong>：协作服务端只排序不解释编辑语义；密钥通过 secret 注入。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>LLM 协议适配 + MCP</summary>
+          <ul>
+            <li><strong>是什么</strong>：把同一套工具定义转换成 Anthropic / OpenAI / MCP 格式。</li>
+            <li><strong>工程职责</strong>：让不同模型都能调用编辑工具。</li>
+            <li><strong>深入入口</strong>：<code>agent/src/registry.ts</code>、<code>llm.ts</code>、<code>tool-router.ts</code>。</li>
+            <li><strong>注意</strong>：工具调用必须经过确认并最终落到 ActionExecutor。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>ffmpeg.wasm / 原生 ffmpeg</summary>
+          <ul>
+            <li><strong>是什么</strong>：ffmpeg 的浏览器 WASM 版与桌面原生版。</li>
+            <li><strong>工程职责</strong>：浏览器主链并不依赖 ffmpeg.wasm；桌面端用原生 ffmpeg 覆盖 ProRes/MXF 等专业格式。</li>
+            <li><strong>深入入口</strong>：<code>apps/web/src/services/native-ffmpeg-backend.ts</code>、<code>apps/desktop/src/main/ipc/export.ts</code>。</li>
+            <li><strong>注意</strong>：桌面 sidecar 被 git 忽略，打包时自动下载。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>@openreel/ui + Tailwind</summary>
+          <ul>
+            <li><strong>是什么</strong>：基于 Radix 的基础组件库与原子化 CSS。</li>
+            <li><strong>工程职责</strong>：Button/Dialog/Select/Slider/Tooltip 等一致交互与主题变量。</li>
+            <li><strong>深入入口</strong>：<code>packages/ui/src/index.ts</code>、<code>styles/globals.css</code>。</li>
+            <li><strong>注意</strong>：领域组件留在各 app，基础控件才放 ui 包。</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Electron + tsup + electron-builder</summary>
+          <ul>
+            <li><strong>是什么</strong>：桌面壳、TypeScript 打包器与安装包构建器。</li>
+            <li><strong>工程职责</strong>：主进程、preload、原生菜单、ffmpeg sidecar、安装包。</li>
+            <li><strong>深入入口</strong>：<code>apps/desktop/package.json</code>、<code>tsup.config.ts</code>。</li>
+            <li><strong>注意</strong>：renderer 复用 web 构建，只是设置 <code>OPENREEL_DESKTOP=1</code>。</li>
+          </ul>
+        </details>
+
+        <div class="callout brand2">
+          <p><strong>技术选型原则：</strong>媒体留在本地、编辑操作可撤销、重计算不阻塞 UI、服务端只做必要协同。理解这四点，就能大致判断一个新功能应该放在哪一层。</p>
+        </div>
+      </section>
+
+      <section id="codec-guide">
+        <h2>17. 编解码背景程序员快速上手</h2>
+        <div class="route"><strong>本节回答：</strong>你已经懂 GOP、码控、YUV、封装与时间基，怎样在半天内定位本工程对应的代码？</div>
+
+        <h3>17.1 把你已有的知识映射到这里</h3>
+        <p class="small">本工程不是从零写 codec，而是把成熟库编排成编辑器能力：<strong>MediaBunny 负责解封装/封装与样本搬运，WebCodecs 负责浏览器端编码，原生 ffmpeg 负责桌面端专业格式</strong>。</p>
+        <table>
+          <thead><tr><th>你熟悉的概念</th><th>工程里的对应物</th><th>入口</th><th>关键差异 / 注意</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Demux / 解封装</td>
+              <td><code>MediaBunny Input</code> + <code>BlobSource</code> 读取容器与轨道，<code>CanvasSink</code> 把视频 sample 绘制到 canvas。</td>
+              <td><code>packages/core/src/media/mediabunny-engine.ts:129-161</code>、<code>:321-340</code></td>
+              <td>这里负责“拿到可解码的视频轨道”；导出解码器由 <code>createExportDecoder</code> 统一创建，桌面可替换为原生解码器。</td>
+            </tr>
+            <tr>
+              <td>Decode / 解码</td>
+              <td><code>ExportFrameDecoder</code> 通过 <code>CanvasSink</code> 输出 <code>OffscreenCanvas</code>，并按时间戳选取“不晚于该时刻的最近帧”。</td>
+              <td><code>packages/core/src/media/mediabunny-engine.ts:99-219</code></td>
+              <td>每个源最多 4 个前向游标，4 秒内继续顺序解码比重新 seek 更划算；上层不直接处理裸 <code>VideoFrame</code>。</td>
+            </tr>
+            <tr>
+              <td>GOP / 关键帧 / 码控</td>
+              <td><code>ExportSettings</code> 与 <code>WebCodecsBackend</code>：<code>bitrate</code>、<code>bitrateMode</code>、<code>rateControl</code>、<code>quality</code>、<code>keyframeInterval</code>。</td>
+              <td><code>packages/core/src/export/types.ts:47-70</code>、<code>:240-249</code>、<code>packages/core/src/export/webcodecs-backend.ts:187-204</code>、<code>:283-289</code></td>
+              <td>默认 <code>keyframeInterval = 60</code> 帧（30fps 下 2 秒）；<code>rateControl: "quality"</code> 是桌面 CRF 语义并忽略 bitrate；浏览器按 <code>bitrateMode</code> 映射 constant/variable。</td>
+            </tr>
+            <tr>
+              <td>Mux / 封装</td>
+              <td>MediaBunny <code>Output</code> + <code>VideoSampleSource</code>/<code>AudioSampleSource</code>，目标是 <code>StreamTarget</code> 或 <code>BufferTarget</code>。</td>
+              <td><code>packages/core/src/export/webcodecs-backend.ts:173-177</code>、<code>:283-305</code></td>
+              <td>这是浏览器端导出落地的最后一步；原生链则由 ffmpeg 参数承担。</td>
+            </tr>
+            <tr>
+              <td>PTS / DTS / 时基</td>
+              <td>工程内部时间统一为<strong>秒（浮点数）</strong>；<code>ExportFrameDecoder</code> 用前向游标按秒取帧。</td>
+              <td><code>packages/core/src/media/mediabunny-engine.ts:99-219</code></td>
+              <td>不要带着“帧号即时间”的假设读代码；片段 offset、sequence offset、trim 都会参与换算。</td>
+            </tr>
+            <tr>
+              <td>YUV / RGB / 色彩空间</td>
+              <td>预览层用 WebGPU 合成器与纹理；调色通过 <code>color-output.ts</code> 的 LUT。</td>
+              <td><code>packages/core/src/video/gpu-compositor.ts</code>、<code>packages/core/src/export/color-output.ts</code></td>
+              <td>上层通常不接触 YUV planar；HDR/HLG/PQ 主要在导出参数与 SDR tone mapping 中体现。</td>
+            </tr>
+            <tr>
+              <td>音频编码 / 混音</td>
+              <td>播放走 Web Audio 音频图；导出前用 <code>OfflineAudioContext</code> 混成单轨再编码。</td>
+              <td><code>packages/core/src/audio/mixdown-cache.ts:234-258</code>、<code>packages/core/src/export/export-engine.ts:357-361</code>、<code>:1339-1342</code></td>
+              <td>音频编码可为 AAC/Opus/MP3 等，取决于容器和浏览器；桌面端还提供 WAV 与多声道导出策略。</td>
+            </tr>
+            <tr>
+              <td>SEI / 字幕嵌入</td>
+              <td><code>embed-sei-captions</code> 在导出后重写 MP4 box，把 CEA-608 写入 H.264 NAL SEI。</td>
+              <td><code>packages/core/src/export/caption-sei-embed.ts</code>、<code>apps/web/src/services/caption-sei.ts</code></td>
+              <td>这是文件级后处理，不经过常规 codec 配置；能显著降低burn-in字幕的编码成本。</td>
+            </tr>
+            <tr>
+              <td>Smart render / 流拷贝</td>
+              <td>源/预设一致且无特效时直接复用 H.264 流。</td>
+              <td><code>packages/core/src/export/smart-render.ts</code>、<code>apps/desktop/src/main/sidecar/smart-export.ts</code></td>
+              <td>可跳过 trim、混合、音频重编码；但 HDR/高色深/透明通道会强制禁用。</td>
+            </tr>
+            <tr>
+              <td>桌面原生编码</td>
+              <td>Electron 主进程通过 IPC 调用 ffmpeg sidecar，逐帧推 <code>RGBA</code> 给原生进程。</td>
+              <td><code>apps/web/src/services/native-ffmpeg-backend.ts</code>、<code>apps/desktop/src/main/ipc/export.ts:17-59</code>、<code>src/main/sidecar/export-job.ts</code></td>
+              <td>帧以 transferable ArrayBuffer 传过进程边界；ProRes、DNxHR、XDCAM、AVC-Intra、MXF 依赖这条链。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>17.2 按天上手路线</h3>
+        <table>
+          <thead><tr><th>时间</th><th>目标</th><th>阅读与实验</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>第 1 天上午</td>
+              <td>搞清楚媒体怎么进来</td>
+              <td>读 <code>packages/core/src/media/mediabunny-engine.ts:129-161</code>（解封装初始化）→ <code>:99-219</code>（<code>ExportFrameDecoder</code> 取帧）→ <code>:321-340</code>（导出解码器创建）。导入 H.264 MP4 后，在 <code>ExportFrameDecoder.getFrame</code> 打断点观察时间戳与游标选择。</td>
+            </tr>
+            <tr>
+              <td>第 1 天下午</td>
+              <td>搞清楚画面怎么显示</td>
+              <td>读 <code>apps/web/src/bridges/render-bridge.ts:164-258</code> → <code>packages/core/src/video/video-engine.ts:65-165</code> → <code>packages/core/src/video/renderer-factory.ts:71-135</code>。观察 WebGPU 与 Canvas2D 两条路径的差异。</td>
+            </tr>
+            <tr>
+              <td>第 2 天</td>
+              <td>掌握导出主链</td>
+              <td>读 <code>packages/core/src/export/types.ts:47-70</code> → <code>packages/core/src/export/export-engine.ts:357-361</code> → <code>packages/core/src/export/webcodecs-backend.ts:173-305</code>。导出 10 秒 H.264 MP4，记录帧率、bitrate、关键帧间隔与封装输出。</td>
+            </tr>
+            <tr>
+              <td>第 3 天</td>
+              <td>补齐音频、HDR 与桌面边界</td>
+              <td>读 <code>packages/core/src/audio/mixdown-cache.ts:234-258</code>、<code>packages/core/src/export/color-output.ts</code>、<code>apps/web/src/services/native-ffmpeg-backend.ts</code>、<code>apps/desktop/src/main/ipc/export.ts:17-59</code>。对比同一段素材在浏览器 H.264 与桌面 ProRes 的导出参数。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>17.3 半天速通的最小阅读清单</h3>
+        <ol>
+          <li><code>packages/core/src/export/types.ts:47-70</code>：先看 <code>ExportSettings</code>，这是所有编码参数的契约。</li>
+          <li><code>packages/core/src/export/webcodecs-backend.ts:173-305</code>：看编码与封装如何串起来。</li>
+          <li><code>packages/core/src/media/mediabunny-engine.ts:99-219</code>：看解封装与按时间戳取帧。</li>
+          <li><code>apps/web/src/bridges/render-bridge.ts:164-258</code>：看时间线状态如何变成渲染引擎输入。</li>
+          <li><code>apps/web/src/services/native-ffmpeg-backend.ts</code>：看专业格式为什么必须走桌面。</li>
+        </ol>
+
+        <h3>17.4 先记住的 8 个结论</h3>
+        <ul>
+          <li><strong>MediaBunny 做 demux/mux，WebCodecs 主要做 encode</strong>；不要把浏览器的解码角色想当然套过来。</li>
+          <li>预览层看到的是 <code>ImageBitmap</code>/canvas，不是裸 <code>VideoFrame</code>。</li>
+          <li>时间统一用<strong>秒（浮点数）</strong>；导出帧解码用前向游标而非随机帧号。</li>
+          <li>浏览器导出主链是 <code>WebCodecsBackend</code> + <code>MediaBunny</code>，ffmpeg 不是浏览器端必经环节。</li>
+          <li>默认关键帧间隔 60 帧（30fps 下 2 秒）；<code>rateControl: "quality"</code> 是桌面 CRF 语义并忽略 bitrate。</li>
+          <li>HDR 导出依赖 hvc1 Main10、BT.2020 PQ/HLG；预览是 SDR tone mapping 后的结果。</li>
+          <li>音频编码可为 AAC/Opus/MP3 等，取决于容器与浏览器；桌面端还有 WAV 与多声道策略。</li>
+          <li>ProRes、DNxHR、XDCAM、AVC-Intra、MXF、透明通道、高位深必须走桌面原生 ffmpeg。</li>
+        </ul>
+
+        <h3>17.5 最容易误判的限制</h3>
+        <table>
+          <thead><tr><th>限制</th><th>表现</th><th>原因 / 处理方式</th></tr></thead>
+          <tbody>
+            <tr><td>浏览器无 WebGPU</td><td>预览回退 Canvas2D，4K/复杂特效性能下降。</td><td>功能仍可用；CI 无 GPU 环境依赖此路径。</td></tr>
+            <tr><td>CBR 尽力而为</td><td>浏览器端恒定码率受编码器实现影响。</td><td><code>bitrateMode: "cbr"</code> 会映射到 WebCodecs 的 constant 模式，但不保证所有平台精确恒定。</td></tr>
+            <tr><td>采集卡输入</td><td>桌面端帧率偏低。</td><td>逐帧 RGBA 经 IPC 传输，开销大。</td></tr>
+            <tr><td>HDR 无法 smart render</td><td>即使源/预设一致也重编码。</td><td>高色深与 HDR 会触发模拟器检查并禁用流复用。</td></tr>
+            <tr><td>离线渲染不是逐帧输出</td><td>没有标准 PNG/JPEG 序列导出。</td><td>底层渲染器支持磁盘帧，但产品层未暴露。</td></tr>
+            <tr><td>AV1 导出</td><td>编码工作但封装失败。</td><td>MediaBunny 当前不支持 AV1 MP4 封装；优先用 VP9/WebM。</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout brand2">
+          <p><strong>一句话上手策略：</strong>先沿着“编码器参数 → 编码与封装 → 解封装与取帧 → 预览渲染”倒着读。你已经懂 codec 原理，真正需要掌握的是这个工程如何把 <code>ExportSettings</code> 翻译成 WebCodecs/ffmpeg 调用，以及如何把时间线变成帧。</p>
+        </div>
+      </section>
+
+
+      <section id="appendix">
+        <h2>18. 附录：关键文件索引</h2>
+        <div class="route"><strong>本节回答：</strong>常用文件都在哪？</div>
+        <table>
+          <thead><tr><th>文件</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr><td><code>package.json</code> / <code>pnpm-workspace.yaml</code></td><td>根脚本、workspace、依赖与补丁。</td></tr>
+            <tr><td><code>apps/web/index.html</code> / <code>src/main.tsx</code> / <code>src/App.tsx</code></td><td>页面入口、启动准备、页面分发。</td></tr>
+            <tr><td><code>apps/web/src/hooks/use-router.ts</code></td><td>hash 路由。</td></tr>
+            <tr><td><code>apps/web/src/stores/project-store.ts</code></td><td>工程状态中心。</td></tr>
+            <tr><td><code>apps/web/src/components/editor/EditorInterface.tsx</code></td><td>编辑器总装。</td></tr>
+            <tr><td><code>apps/web/src/services/auto-save.ts</code></td><td>自动保存。</td></tr>
+            <tr><td><code>apps/web/src/services/export-runner.ts</code></td><td>导出主流程。</td></tr>
+            <tr><td><code>packages/core/src/index.ts</code></td><td>核心引擎总入口。</td></tr>
+            <tr><td><code>packages/core/src/actions/action-executor.ts</code></td><td>动作执行与撤销基础。</td></tr>
+            <tr><td><code>packages/agent/src/registry.ts</code></td><td>AI 工具注册表。</td></tr>
+            <tr><td><code>packages/collab/src/protocol.ts</code> / <code>room-core.ts</code></td><td>协作协议与服务端逻辑。</td></tr>
+            <tr><td><code>apps/cloud/src/collab/room-do.ts</code></td><td>协作 Durable Object。</td></tr>
+            <tr><td><code>apps/desktop/package.json</code></td><td>桌面脚本与打包入口。</td></tr>
+          </tbody>
+        </table>
+        <p class="small" style="margin-top:36px">相关文档：<a href="./界面英文菜单对照.html">界面英文菜单对照</a> ｜ <a href="./编辑使用攻略.html">编辑使用攻略</a> ｜ <a href="./部署与操作指南.html">部署与操作指南</a></p>
+      </section>
+    </article>
+  </div>
+
+  <footer>
+    本文档由工程静态分析生成，路径与行号以仓库当前代码为准。结构化重构版：2026-11-19；新增第 2 章“浏览器在工程中的角色”、第 10 章“音视频编辑操作的技术原理”（含贴图、字幕、转场与音画同步）与第 17 章“编解码背景程序员快速上手”。
+  </footer>
+</body>
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenReel Video 部署与操作指南</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --ink: #1f2430;
+      --muted: #5c6473;
+      --line: #e3e6ee;
+      --accent: #4f46e5;
+      --accent-soft: #eef2ff;
+      --warn: #b45309;
+      --warn-soft: #fffbeb;
+      --ok: #047857;
+      --ok-soft: #ecfdf5;
+      --code: #111827;
+      --code-ink: #e5e7eb;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(31, 36, 48, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.75;
+      font-size: 15px;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .topbar {
+      background: linear-gradient(135deg, #312e81, #4f46e5 55%, #6d28d9);
+      color: #fff;
+      padding: 34px 24px 28px;
+    }
+    .topbar-inner { max-width: 1180px; margin: 0 auto; }
+    .topbar h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: -0.5px; }
+    .topbar p { margin: 0; opacity: 0.9; max-width: 800px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.28);
+      font-size: 12px;
+    }
+    .nav-links { margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap; }
+    .nav-links a { color: #fff; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; }
+    .layout {
+      max-width: 1180px;
+      margin: 24px auto;
+      padding: 0 20px 60px;
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    aside {
+      position: sticky;
+      top: 20px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      box-shadow: var(--shadow);
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+    }
+    aside strong { display: block; margin-bottom: 10px; font-size: 13px; color: var(--muted); letter-spacing: .08em; }
+    aside ol { margin: 0; padding-left: 20px; }
+    aside li { margin: 6px 0; }
+    aside a { color: var(--ink); font-size: 13px; }
+    article {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 30px 34px 44px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+    h2 {
+      margin: 40px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent-soft);
+      font-size: 22px;
+      scroll-margin-top: 20px;
+    }
+    h2:first-of-type { margin-top: 8px; }
+    h3 { margin: 26px 0 10px; font-size: 17px; color: #312e81; }
+    h4 { margin: 18px 0 8px; font-size: 15px; }
+    p { margin: 10px 0; }
+    ul, ol { padding-left: 22px; }
+    li { margin: 5px 0; }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      background: #f1f2f7;
+      border: 1px solid #e6e8f0;
+      border-radius: 5px;
+      padding: 1px 5px;
+      font-size: 0.92em;
+    }
+    pre {
+      background: var(--code);
+      color: var(--code-ink);
+      border-radius: 10px;
+      padding: 16px 18px;
+      overflow: auto;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+    pre code { background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--line); padding: 9px 11px; text-align: left; vertical-align: top; min-width: 110px; }
+    th { background: #f8f9fc; font-weight: 600; }
+    tr:nth-child(even) td { background: #fcfcfe; }
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      padding: 12px 16px;
+      border-radius: 0 10px 10px 0;
+      margin: 16px 0;
+    }
+    .callout.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+    .callout.ok { border-left-color: var(--ok); background: var(--ok-soft); }
+    .callout p:first-child { margin-top: 0; }
+    .callout p:last-child { margin-bottom: 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 16px 0; }
+    .card { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: #fbfbfe; }
+    .card h4 { margin-top: 0; color: #312e81; }
+    .steps { counter-reset: step; }
+    .steps > .step { position: relative; padding-left: 42px; margin: 18px 0; counter-increment: step; }
+    .steps > .step::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 1px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    details { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 12px 0; background: #fbfbfe; }
+    summary { cursor: pointer; font-weight: 600; }
+    .todo-list { list-style: none; padding-left: 0; }
+    .todo-list li::before { content: "□"; margin-right: 8px; color: var(--accent); font-weight: 700; }
+    .small { font-size: 13px; color: var(--muted); }
+    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; }
+    @media (max-width: 880px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { position: static; max-height: none; }
+      article { padding: 22px 18px 32px; }
+      .topbar h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1>OpenReel Video 部署与操作指南</h1>
+      <p>面向第一次部署该工程的程序员：从环境准备、首次启动、日常命令，到生产构建、Cloudflare Pages 部署、多应用与故障排查。本文基于仓库当前快照编写。</p>
+      <div class="badges">
+        <span class="badge">仓库：openreel-video</span>
+        <span class="badge">包管理：pnpm workspace</span>
+        <span class="badge">主应用：apps/web</span>
+        <span class="badge">生成日期：2026-11-19（重新生成）</span>
+      </div>
+      <nav class="nav-links">
+        <a href="./界面英文菜单对照.html">阅读《界面英文菜单对照》</a>
+        <a href="./编辑使用攻略.html">阅读《编辑使用攻略》</a>
+        <a href="./工程源码分析.html">阅读《工程源码分析文档》</a>
+        <a href="../README.md">查看仓库 README</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <strong>目录</strong>
+      <ol>
+        <li><a href="#summary">结论速览</a></li>
+        <li><a href="#environment">环境与前置依赖</a></li>
+        <li><a href="#first-run">首次本地部署</a></li>
+        <li><a href="#commands">常用命令矩阵</a></li>
+        <li><a href="#ports">端口与本地服务</a></li>
+        <li><a href="#env">环境变量</a></li>
+        <li><a href="#production">生产构建与部署</a></li>
+        <li><a href="#apps">其他应用部署</a></li>
+        <li><a href="#ci">CI/CD 流程</a></li>
+        <li><a href="#checklist">验收清单</a></li>
+        <li><a href="#troubleshooting">故障排查</a></li>
+      </ol>
+    </aside>
+
+    <article>
+      <section id="summary">
+        <h2>1. 结论速览</h2>
+        <div class="callout ok">
+          <p><strong>最小可用路径：</strong><code>pnpm install</code> → <code>pnpm build:wasm</code> → <code>pnpm dev</code> → 浏览器打开 <code>http://localhost:5173</code>。</p>
+        </div>
+        <p>这个仓库是一个 pnpm monorepo，但根目录的 <code>pnpm dev</code> <strong>只启动 Web 编辑器</strong>（<code>apps/web</code>）。用户之前执行的 <code>pnpm install</code> 与 <code>pnpm dev</code> 只完成了依赖安装和 Vite 启动；如果新克隆后没有执行 <code>pnpm build:wasm</code>，部分音频/频谱功能会缺少 WASM 产物。</p>
+        <div class="grid">
+          <div class="card">
+            <h4>核心 Web 应用</h4>
+            <p><code>apps/web</code>，React 19 + TypeScript + Vite。编辑器、欢迎页、AI 对话、协作、导出等 UI 均在这里。</p>
+          </div>
+          <div class="card">
+            <h4>核心引擎</h4>
+            <p><code>packages/core</code>，时间线、动作执行、渲染、字幕、导出等领域引擎；通过源码别名直接被 web 引用。</p>
+          </div>
+          <div class="card">
+            <h4>生产托管</h4>
+            <p>Cloudflare Pages，项目名 <code>openreel</code>；产物目录 <code>apps/web/dist</code>；SPA 重写与安全头已随仓库提供。</p>
+          </div>
+          <div class="card">
+            <h4>重要提醒</h4>
+            <p>仓库 README 写 5173，<code>start.sh</code> 写 5174；二者并不冲突，<code>start.sh</code> 只是额外指定了端口。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="environment">
+        <h2>2. 环境与前置依赖</h2>
+        <table>
+          <thead>
+            <tr><th>项目</th><th>要求</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Node.js</td><td>≥ 18；推荐 22 LTS</td><td>根 <code>engines.node</code> 为 <code>&gt;=18</code>，CI 使用 Node 22。</td></tr>
+            <tr><td>pnpm</td><td>packageManager 锁定 <code>11.7.0</code></td><td>根 <code>package.json</code> 指定；CI 用 <code>pnpm/action-setup@v4</code> 自动解析。</td></tr>
+            <tr><td>浏览器</td><td>Chrome/Edge 94+ 推荐</td><td>依赖 WebCodecs / WebGPU；无 WebGPU 时回退 Canvas2D。README 标注 Firefox 130+、Safari 16.4+。</td></tr>
+            <tr><td>内存/GPU</td><td>8GB+，4K 建议 16GB+</td><td>4K 剪辑建议独显；纯 CPU 环境可运行但性能有限。</td></tr>
+            <tr><td>ffmpeg</td><td>测试/E2E 与桌面包需要</td><td>Web 主链使用 ffmpeg.wasm；CI 单测和 E2E 会调用系统 ffmpeg/ffprobe。</td></tr>
+            <tr><td>xmllint</td><td>运行完整单测需要</td><td>FCPXML/XMEML 交换格式测试依赖 <code>libxml2-utils</code>，缺失会失败而非跳过。</td></tr>
+            <tr><td>WASM 工具链</td><td>仅需 AssemblyScript（npm 包）</td><td>主链 <code>pnpm build:wasm</code> 不需要 Rust/Emscripten/Go。</td></tr>
+            <tr><td>Cloudflare Wrangler</td><td>部署 Pages/Worker 需要</td><td>已作为 web/cloud/image 的 devDependency 安装，首次需登录授权。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>2.1 启用 pnpm</h3>
+        <pre><code>node --version
+corepack enable
+corepack prepare pnpm@11.7.0 --activate
+pnpm --version</code></pre>
+        <p class="small">如果本机没有 Corepack，也可以直接 <code>npm install -g pnpm@11.7.0</code>。CI 与本地都建议遵循 <code>packageManager</code> 字段，避免 lockfile 版本漂移。</p>
+
+        <div class="callout warn">
+          <p><strong>不要跳过 <code>pnpm build:wasm</code>。</strong> 三个 WASM 产物没有被提交到仓库，且被 <code>.gitignore</code> 忽略；新克隆后必须显式构建。</p>
+        </div>
+      </section>
+
+      <section id="first-run">
+        <h2>3. 首次本地部署（推荐流程）</h2>
+        <div class="steps">
+          <div class="step">
+            <h3>克隆仓库</h3>
+            <pre><code>git clone https://github.com/Augani/openreel-video.git
+cd openreel-video</code></pre>
+          </div>
+          <div class="step">
+            <h3>安装依赖</h3>
+            <pre><code>pnpm install</code></pre>
+            <p>该命令会按 <code>pnpm-workspace.yaml</code> 安装 <code>apps/*</code> 与 <code>packages/*</code>，并应用两个 ffmpeg 补丁：</p>
+            <pre><code>@ffmpeg/core@0.12.6      → patches/@ffmpeg__core@0.12.6.patch
+@ffmpeg/core-mt@0.12.6 → patches/@ffmpeg__core-mt@0.12.6.patch</code></pre>
+            <p class="small">CI 环境使用 <code>pnpm install --frozen-lockfile</code>；本地首次部署也建议保持 lockfile 不被改动。</p>
+          </div>
+          <div class="step">
+            <h3>构建 WASM 模块</h3>
+            <pre><code>pnpm build:wasm</code></pre>
+            <p>该命令实际执行 <code>asc</code>（AssemblyScript）三次，生成：</p>
+            <pre><code>packages/core/src/wasm/fft/build/fft.wasm
+packages/core/src/wasm/wav/build/wav.wasm
+packages/core/src/wasm/beat-detection/build/beat.wasm</code></pre>
+          </div>
+          <div class="step">
+            <h3>启动开发服务器</h3>
+            <pre><code>pnpm dev
+# 打开 http://localhost:5173</code></pre>
+            <p>等效于 <code>pnpm --filter @openreel/web dev</code>。Vite 配置在 dev 与 preview 阶段注入 COOP/COEP 响应头，以支持 SharedArrayBuffer。</p>
+          </div>
+          <div class="step">
+            <h3>可选：使用仓库自带启动脚本</h3>
+            <pre><code>./start.sh
+# 固定使用 http://localhost:5174</code></pre>
+            <p class="small"><code>start.sh</code> 的 WASM 检查路径写成了 <code>packages/core/src/wasm/build</code>，与实际产物路径不一致，因此它几乎总会重新执行 <code>pnpm build:wasm</code>。这不是致命问题，只是多做一次构建。</p>
+          </div>
+        </div>
+
+        <details>
+          <summary>如果 5173 端口被占用</summary>
+          <pre><code>pnpm dev -- --port 5174</code></pre>
+          <p>注意 <code>apps/image</code> 和 <code>apps/studio</code> 的默认端口也是 5174，同时启动多个应用时需错开端口。</p>
+        </details>
+      </section>
+
+      <section id="commands">
+        <h2>4. 常用命令矩阵</h2>
+        <h3>4.1 根目录命令</h3>
+        <table>
+          <thead><tr><th>命令</th><th>实际动作</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr><td><code>pnpm dev</code></td><td><code>pnpm --filter @openreel/web dev</code></td><td>启动 Web 编辑器开发服务器。</td></tr>
+            <tr><td><code>pnpm build:wasm</code></td><td><code>pnpm --filter @openreel/core build:wasm</code></td><td>生成 fft/wav/beat-detection 三个 WASM。</td></tr>
+            <tr><td><code>pnpm build</code></td><td><code>build:wasm</code> → <code>@openreel/web build</code></td><td>生产构建；Web 构建为 <code>tsc --noEmit &amp;&amp; vite build</code>。</td></tr>
+            <tr><td><code>pnpm preview</code></td><td><code>@openreel/web preview</code></td><td>本地预览 <code>apps/web/dist</code>。</td></tr>
+            <tr><td><code>pnpm deploy</code></td><td><code>pnpm build</code> → Pages 部署</td><td>发布到 Cloudflare Pages 项目 <code>openreel</code>。</td></tr>
+            <tr><td><code>pnpm deploy:preview</code></td><td><code>pnpm build</code> → Pages preview 分支</td><td>发布预览分支。</td></tr>
+            <tr><td><code>pnpm typecheck</code></td><td><code>pnpm -r typecheck</code></td><td>递归类型检查。</td></tr>
+            <tr><td><code>pnpm test</code></td><td><code>pnpm -r test:run</code></td><td>递归运行单元测试（vitest run）。</td></tr>
+            <tr><td><code>pnpm test:watch</code></td><td><code>pnpm -r test</code></td><td>递归运行 vitest 监听模式。</td></tr>
+            <tr><td><code>pnpm lint</code></td><td><code>pnpm -r lint</code></td><td>仅对声明了 lint 的包生效，实际主要是 web/image/studio。</td></tr>
+            <tr><td><code>pnpm check:mobile-offline</code></td><td><code>node scripts/check-mobile-offline.mjs</code></td><td>移动端离线能力检查。</td></tr>
+            <tr><td><code>pnpm check:retired-cloud-gpu</code></td><td><code>node scripts/check-retired-cloud-gpu.mjs</code></td><td>检查已退役云 GPU 相关残留。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>4.2 apps/web 专用命令</h3>
+        <table>
+          <thead><tr><th>命令</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><code>pnpm --filter @openreel/web test</code></td><td>Web 单测（vitest）。</td></tr>
+            <tr><td><code>pnpm --filter @openreel/web test:e2e</code></td><td>Playwright E2E，默认 port 5391，3 个渲染项目（gpu/fallback-nowebgpu/fallback-software）。</td></tr>
+            <tr><td><code>pnpm --filter @openreel/web bundle:budget</code></td><td>检查入口/初始 JS/editor/agent chunk 体积预算。</td></tr>
+            <tr><td><code>pnpm --filter @openreel/web perf:gate</code></td><td>渲染次数冒烟测试（400 个 clip 的时间线交互）。</td></tr>
+            <tr><td><code>pnpm --filter @openreel/web test:soak</code></td><td>长时间稳定性测试，要求生产构建产物。</td></tr>
+            <tr><td><code>pnpm --filter @openreel/web test:e2e:prod</code></td><td>对生产预览产物执行 E2E。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="ports">
+        <h2>5. 端口与本地服务</h2>
+        <table>
+          <thead><tr><th>服务</th><th>地址</th><th>来源</th></tr></thead>
+          <tbody>
+            <tr><td>Web 开发服务器</td><td><code>http://localhost:5173</code></td><td>Vite 默认值；<code>apps/web/vite.config.ts</code> 未显式配置 port。</td></tr>
+            <tr><td><code>start.sh</code> 启动的 Web</td><td><code>http://localhost:5174</code></td><td><code>start.sh:20-21</code> 固定传 <code>--port 5174</code>。</td></tr>
+            <tr><td>Image / Studio 开发服务器</td><td><code>http://localhost:5174</code></td><td>各自 <code>vite.config.ts</code> 显式配置端口。</td></tr>
+            <tr><td>Cloud Worker 本地</td><td><code>http://localhost:8787</code></td><td><code>wrangler dev</code> 默认值；Studio 的 <code>VITE_API_URL</code> 默认指向它。</td></tr>
+            <tr><td>Vite preview</td><td><code>http://localhost:4173</code></td><td>Vite 默认值。</td></tr>
+            <tr><td>Web E2E</td><td><code>5391</code></td><td><code>playwright.config.ts</code> 与 CI 固定。</td></tr>
+            <tr><td>Soak 测试</td><td><code>5392</code></td><td><code>playwright.soak.config.ts</code>。</td></tr>
+          </tbody>
+        </table>
+        <div class="callout">
+          <p>本地 Web 在 dev 环境将 OpenReel Cloud 指向 <code>http://localhost:8787</code>（<code>src/config/api-endpoints.ts</code>）。如果不使用协作/市场等云服务，不启动 Worker 也能使用编辑器主功能。</p>
+        </div>
+      </section>
+
+      <section id="env">
+        <h2>6. 环境变量</h2>
+        <table>
+          <thead><tr><th>变量</th><th>作用</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td><code>VITE_PUBLIC_POSTHOG_KEY</code></td><td>PostHog 分析 key</td><td>可选；模板见 <code>apps/web/.env.example</code>。</td></tr>
+            <tr><td><code>VITE_PUBLIC_POSTHOG_HOST</code></td><td>PostHog 服务地址</td><td>可选；与 key 同时存在才启用。</td></tr>
+            <tr><td><code>VITE_ENABLE_SW</code></td><td>dev 下显式开启 Service Worker</td><td>默认 dev 不注册，生产自动注册。</td></tr>
+            <tr><td><code>VITE_OPENREEL_E2E=1</code></td><td>注入 <code>window.__openreelE2E</code></td><td>仅测试使用。</td></tr>
+            <tr><td><code>OPENREEL_DESKTOP=1</code></td><td>切换桌面 renderer 构建</td><td>base 改为 <code>./</code>，裁剪字体并剥离 ffmpeg wasm。</td></tr>
+            <tr><td><code>OPENREEL_NO_MINIFY=1</code></td><td>关闭压缩</td><td>性能分析用。</td></tr>
+            <tr><td><code>OPENREEL_REACT_PROFILING=1</code></td><td>启用 React profiling renderer</td><td>CPU profile 用。</td></tr>
+            <tr><td><code>VITE_API_URL</code></td><td>Studio 的 API 基地址</td><td>默认 <code>http://localhost:8787</code>。</td></tr>
+            <tr><td><code>OPENREEL_E2E_CHANNEL</code></td><td>E2E 浏览器通道</td><td>CI 固定为 <code>chrome</code>，因 Linux 自带 Chromium 缺专有编解码器。</td></tr>
+            <tr><td><code>OPENREEL_E2E_PORT</code></td><td>E2E 端口</td><td>CI 固定 <code>5391</code>。</td></tr>
+            <tr><td><code>EVENT_HMAC_SECRET</code></td><td>Cloud 市场事件 HMAC 密钥</td><td>Worker secret，按需配置。</td></tr>
+            <tr><td><code>CRASH_ADMIN_TOKEN</code></td><td>Cloud crash 读接口 Bearer token</td><td>Worker secret，按需配置。</td></tr>
+          </tbody>
+        </table>
+        <h3>6.1 API 代理策略</h3>
+        <p><code>apps/web/src/services/api-proxy.ts</code> 统一封装第三方 API 调用：</p>
+        <ul>
+          <li>开发环境：直连 ElevenLabs / OpenAI / Anthropic 等内置服务。</li>
+          <li>生产环境：内置服务走同源 <code>/api/proxy/&lt;service&gt;/&lt;path&gt;</code>，由 Cloudflare Pages Function 转发。</li>
+          <li>用户自定义兼容端点：始终直连，避免把托管代理变成任意目标中继。</li>
+          <li>桌面端：通过 <code>window.openreel.cloud.fetch</code> 走主进程桥接。</li>
+        </ul>
+      </section>
+
+      <section id="production">
+        <h2>7. Web 生产构建与部署</h2>
+        <h3>7.1 构建与本地预览</h3>
+        <pre><code>pnpm build
+pnpm preview
+# 默认 http://localhost:4173</code></pre>
+        <p><code>pnpm build</code> 的顺序为：</p>
+        <ol>
+          <li><code>pnpm build:wasm</code>：生成三个 WASM。</li>
+          <li><code>pnpm --filter @openreel/web build</code>：先运行 <code>tsc --noEmit</code>，再运行 <code>vite build</code>。</li>
+          <li>产物输出到 <code>apps/web/dist</code>（Vite 默认，且与 <code>wrangler.toml</code> 的 <code>pages_build_output_dir = "dist"</code> 一致）。</li>
+        </ol>
+
+        <h3>7.2 部署到 Cloudflare Pages</h3>
+        <pre><code>pnpm --filter @openreel/web exec wrangler login
+pnpm deploy:preview
+# 或
+pnpm deploy</code></pre>
+        <table>
+          <thead><tr><th>配置项</th><th>值</th><th>文件</th></tr></thead>
+          <tbody>
+            <tr><td>Pages 项目名</td><td><code>openreel</code></td><td><code>apps/web/package.json</code></td></tr>
+            <tr><td>Preview 项目名</td><td><code>openreel-preview</code></td><td><code>apps/web/wrangler.toml</code></td></tr>
+            <tr><td>产物目录</td><td><code>dist</code></td><td><code>apps/web/wrangler.toml</code></td></tr>
+            <tr><td>兼容性日期</td><td><code>2024-01-01</code></td><td><code>apps/web/wrangler.toml</code></td></tr>
+            <tr><td>SPA 重写</td><td><code>/* /index.html 200</code></td><td><code>apps/web/public/_redirects</code></td></tr>
+            <tr><td>安全/CORP 头</td><td>COOP same-origin、COEP require-corp、nosniff、DENY、Referrer-Policy</td><td><code>apps/web/public/_headers</code></td></tr>
+          </tbody>
+        </table>
+        <div class="callout warn">
+          <p>CI 中没有自动部署 Web 的步骤；<code>ci.yml</code> 的 build job 只执行 <code>pnpm build</code>。发布需要人工执行 <code>pnpm deploy</code> / <code>pnpm deploy:preview</code>，或由外部平台触发。</p>
+        </div>
+        <p class="small">自定义域注释：<code>app.openreel.video</code> 对应标准编辑器；<code>motion.openreel.video</code> 当前回退到标准编辑器，因为 Web 特性配置中 Motion Creator 处于关闭状态。</p>
+      </section>
+
+      <section id="apps">
+        <h2>8. 其他应用与构建产物</h2>
+        <table>
+          <thead><tr><th>应用</th><th>开发</th><th>构建</th><th>产物 / 部署</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>apps/web</code></td>
+              <td><code>pnpm --filter @openreel/web dev</code><br />5173</td>
+              <td><code>pnpm --filter @openreel/web build</code></td>
+              <td><code>apps/web/dist</code><br />Pages 项目 <code>openreel</code></td>
+            </tr>
+            <tr>
+              <td><code>apps/image</code></td>
+              <td><code>pnpm --filter @openreel/image dev</code><br />5174</td>
+              <td><code>pnpm --filter @openreel/image build</code></td>
+              <td><code>apps/image/dist</code><br />Pages 项目 <code>openreel-image</code></td>
+            </tr>
+            <tr>
+              <td><code>apps/studio</code></td>
+              <td><code>pnpm --filter @openreel/studio dev</code><br />5174</td>
+              <td><code>pnpm --filter @openreel/studio build</code></td>
+              <td><code>apps/studio/dist</code><br />无 deploy 脚本</td>
+            </tr>
+            <tr>
+              <td><code>apps/cloud</code></td>
+              <td><code>pnpm --filter cloud dev</code><br />8787</td>
+              <td>无传统 build，<code>tsc --noEmit</code></td>
+              <td><code>wrangler deploy</code><br />Worker + Durable Object</td>
+            </tr>
+            <tr>
+              <td><code>apps/desktop</code></td>
+              <td><code>pnpm --filter @openreel/desktop dev</code></td>
+              <td><code>pnpm --filter @openreel/desktop build</code></td>
+              <td>主进程 JS 在 <code>apps/desktop/dist</code>；renderer 复用 <code>apps/web/dist</code>；安装包在 <code>apps/desktop/release</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>8.1 桌面端打包</h3>
+        <pre><code>pnpm --filter @openreel/desktop pack   # 目录形式，--dir
+pnpm --filter @openreel/desktop dist   # 完整安装包</code></pre>
+        <ul>
+          <li><code>build:renderer</code> 会设置 <code>OPENREEL_DESKTOP=1</code> 后重建 web renderer。</li>
+          <li><code>build:main</code> 用 <code>tsup</code> 构建主进程、preload、Aurora host、MCP shim。</li>
+          <li><code>pack</code> / <code>dist</code> 会先执行 <code>fetch:ffmpeg</code>，按固定 SHA256 下载 ffmpeg sidecar；这些二进制被 git 忽略。</li>
+          <li>原生 Aurora renderer 由 <code>prepare-aurora-native.mjs</code> 从 <code>packages/creation-core/build</code> 复制；缺失时跳过并有 CPU fallback。</li>
+        </ul>
+
+        <h3>8.2 独立资源部署脚本</h3>
+        <ul>
+          <li><code>scripts/filters/deploy.sh</code>：上传 <code>.cube</code> 滤镜与 manifest 到 R2，默认 bucket <code>openreel-filters</code>、域名 <code>https://filters.openreel.video</code>。</li>
+          <li><code>scripts/upload-vidstab-r2.sh</code>：上传 ffmpeg-vidstab core 到 <code>pub-openreel</code> bucket。</li>
+          <li><code>packages/creation-core</code> 的原生/WASM 构建独立于此链路；需要 CMake/C++20 / Emscripten，仅在做原生创建引擎开发时才需要。</li>
+        </ul>
+      </section>
+
+      <section id="ci">
+        <h2>9. CI/CD 流程</h2>
+        <table>
+          <thead><tr><th>工作流</th><th>触发</th><th>主要步骤</th></tr></thead>
+          <tbody>
+            <tr><td><code>.github/workflows/ci.yml</code></td><td>push / PR 到 <code>main</code>、<code>feat/ios-app</code></td><td>test → build → perf-smoke → e2e（10 shard）。</td></tr>
+            <tr><td><code>ci.yml#test</code></td><td>同上</td><td>Node 22、frozen lockfile、安装 xmllint/ffmpeg、typecheck、lint、build:wasm、test。</td></tr>
+            <tr><td><code>ci.yml#build</code></td><td>依赖 test</td><td>安装依赖后执行 <code>pnpm build</code>。</td></tr>
+            <tr><td><code>ci.yml#perf-smoke</code></td><td>同上</td><td>build:wasm → web build → bundle:budget → perf:gate。</td></tr>
+            <tr><td><code>ci.yml#e2e</code></td><td>同上</td><td>ubuntu-24.04 + Google Chrome，端口 5391，按 <code>shard-plan.mjs</code> 分 10 片跑。</td></tr>
+            <tr><td><code>.github/workflows/release.yml</code></td><td>tag <code>v*</code> 或手动</td><td>quality → 三平台 build → manifest → 上传 R2；macOS 签名/公证。</td></tr>
+            <tr><td><code>desktop-readiness.yml</code></td><td>桌面相关</td><td>桌面 typecheck/test + 真 Electron/ffmpeg 套件。</td></tr>
+            <tr><td><code>perf-gate.yml</code></td><td>定时/手动</td><td>Web 性能与桌面包体预算。</td></tr>
+          </tbody>
+        </table>
+        <p class="small">E2E 使用 Google Chrome 而非 Playwright 自带 Chromium，原因是 Linux 版 Chromium 缺少 H.264/AAC 等专有编解码器，会影响导出、多机位、代理和字幕相关用例。</p>
+      </section>
+
+      <section id="checklist">
+        <h2>10. 首次部署验收清单</h2>
+        <ul class="todo-list">
+          <li><code>node --version</code> 输出 ≥ 18，推荐 22。</li>
+          <li><code>pnpm --version</code> 输出 11.7.0（或与 packageManager 一致）。</li>
+          <li><code>pnpm install</code> 成功且未出现 patch 失败。</li>
+          <li><code>pnpm build:wasm</code> 成功，三个 <code>.wasm</code> 文件存在。</li>
+          <li><code>pnpm dev</code> 后 <code>http://localhost:5173</code> 能打开欢迎页。</li>
+          <li>浏览器控制台无 SharedArrayBuffer / COOP / COEP 相关错误。</li>
+          <li>可创建项目、导入媒体、打开时间线并预览。</li>
+          <li><code>pnpm typecheck</code> 通过。</li>
+          <li>如需跑完整测试，系统已安装 <code>ffmpeg</code> 与 <code>xmllint</code>。</li>
+          <li><code>pnpm build</code> 成功生成 <code>apps/web/dist</code>。</li>
+          <li><code>pnpm preview</code> 可访问生产构建产物。</li>
+          <li>如需部署，Wrangler 已登录且有 Pages 项目权限。</li>
+        </ul>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>11. 故障排查</h2>
+        <details open>
+          <summary>11.1 页面空白或控制台报 WASM 404</summary>
+          <p>先确认是否已执行 <code>pnpm build:wasm</code>，再检查三个产物路径。不要只依赖 <code>start.sh</code> 的路径判断，它的检查目录与实际产物目录不一致。</p>
+        </details>
+        <details>
+          <summary>11.2 报 SharedArrayBuffer 不可用</summary>
+          <p>开发/预览阶段由 Vite 的 <code>server.headers</code> / <code>preview.headers</code> 注入 COOP 与 COEP；生产阶段由 <code>public/_headers</code> 提供。如果你用自建反向代理托管 <code>dist</code>，必须自行补上：</p>
+          <pre><code>Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp</code></pre>
+        </details>
+        <details>
+          <summary>11.3 pnpm install 报 ffmpeg patch 失败</summary>
+          <p>确认 <code>pnpm-workspace.yaml</code> 中两条 <code>patchedDependencies</code> 与 <code>patches/</code> 目录文件都存在，并使用仓库自带 <code>pnpm-lock.yaml</code>。不要删除 lockfile 后重装，也不要关闭 patches。</p>
+        </details>
+        <details>
+          <summary>11.4 端口冲突</summary>
+          <p>Web 默认 5173；image/studio 默认 5174；cloud worker 8787；E2E 5391。可使用 <code>pnpm dev -- --port 5174</code> 临时调整 Web 端口，或停止占用端口的进程。</p>
+        </details>
+        <details>
+          <summary>11.5 单测或 E2E 因外部命令失败</summary>
+          <p>安装系统依赖：macOS 可用 <code>brew install ffmpeg</code>；Ubuntu 可用 <code>sudo apt-get install -y ffmpeg libxml2-utils</code>。E2E 还需 <code>pnpm --filter @openreel/web exec playwright install --with-deps chrome</code>。</p>
+        </details>
+        <details>
+          <summary>11.6 没有 WebGPU，预览是否正常？</summary>
+          <p>应用设计了渐进增强：无 WebGPU adapter 时回退到 Canvas2D；CI 的无 GPU 环境也依赖此路径。功能可用，但 4K/复杂特效性能会下降。</p>
+        </details>
+        <details>
+          <summary>11.7 界面没有中文</summary>
+          <p>当前 Web 应用没有实现 UI i18n：依赖中没有 i18n 框架，源码中也没有语言包或语言切换入口，首屏与编辑器文案是硬编码英文。<code>settings-store</code> 中的 <code>language</code> 字段不是界面语言开关。需要额外实现翻译层与中文语言包，重装依赖不会自动中文化。详见 <a href="./工程源码分析.html#i18n">源码分析文档中的说明</a>。</p>
+        </details>
+        <details>
+          <summary>11.8 桌面端缺少 ffmpeg / 原生渲染器</summary>
+          <p>执行 <code>pnpm --filter @openreel/desktop fetch:ffmpeg</code> 下载 sidecar；原生 Aurora renderer 由 <code>prepare:aurora</code> 尝试复制，缺失时使用 CPU fallback，不影响启动。</p>
+        </details>
+        <details>
+          <summary>11.9 新建的 docs 文档没有被 git 跟踪</summary>
+          <p>仓库 <code>.gitignore</code> 默认忽略 <code>docs/*</code>，只放行少数目录。本文与配套源码分析文档已通过白名单规则放行，若你新增其他文档，也需要添加对应的 <code>!docs/xxx</code> 规则。</p>
+        </details>
+      </section>
+
+      <p class="small" style="margin-top:36px">相关阅读：<a href="./界面英文菜单对照.html">OpenReel Video 界面英文菜单对照</a> ｜ <a href="./编辑使用攻略.html">OpenReel Video 编辑使用攻略</a> ｜ <a href="./工程源码分析.html">OpenReel Video 工程源码分析文档</a> ｜ <a href="../CONTRIBUTING.md">贡献指南</a> ｜ <a href="../docs/known-limitations.md">已知限制</a></p>
+    </article>
+  </div>
+
+  <footer>
+    本文档由工程静态分析生成，命令与配置以仓库当前代码为准。重新生成时间：2026-11-19。
+  </footer>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenReel Video 编辑使用攻略</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #fff;
+      --ink: #202431;
+      --muted: #616a7a;
+      --line: #e4e7ef;
+      --accent: #0f766e;
+      --accent-2: #4338ca;
+      --accent-soft: #ecfeff;
+      --warn: #b45309;
+      --warn-soft: #fffbeb;
+      --danger: #b91c1c;
+      --danger-soft: #fef2f2;
+      --code: #111827;
+      --code-ink: #e5e7eb;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(32, 36, 49, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.75;
+      font-size: 15px;
+    }
+    a { color: var(--accent-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header {
+      background: linear-gradient(135deg, #115e59, #0f766e 50%, #4338ca);
+      color: #fff;
+      padding: 34px 24px 28px;
+    }
+    .wrap { max-width: 1220px; margin: 0 auto; }
+    header h1 { margin: 0 0 8px; font-size: 30px; }
+    header p { margin: 0; max-width: 880px; opacity: .93; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .badge { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); }
+    .links { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 16px; }
+    .links a { color: #fff; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; }
+    .layout { max-width: 1220px; margin: 24px auto 60px; padding: 0 20px; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; align-items: start; }
+    aside { position: sticky; top: 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 16px; box-shadow: var(--shadow); max-height: calc(100vh - 40px); overflow: auto; }
+    aside strong { display: block; color: var(--muted); font-size: 12px; letter-spacing: .1em; margin-bottom: 10px; }
+    aside ol { padding-left: 20px; margin: 0; }
+    aside li { margin: 6px 0; }
+    aside a { color: var(--ink); font-size: 13px; }
+    article { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px 36px 46px; box-shadow: var(--shadow); min-width: 0; }
+    h2 { margin: 42px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--accent-soft); font-size: 22px; scroll-margin-top: 20px; }
+    h2:first-of-type { margin-top: 6px; }
+    h3 { margin: 26px 0 10px; font-size: 17px; color: #0f5f59; }
+    h4 { margin: 18px 0 8px; font-size: 15px; color: #3730a3; }
+    p { margin: 10px 0; }
+    ul, ol { padding-left: 22px; }
+    li { margin: 6px 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f1f3f7; border: 1px solid #e5e8f0; border-radius: 5px; padding: 1px 5px; font-size: .92em; }
+    kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f8fafc; border: 1px solid #cbd5e1; border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; font-size: 12px; white-space: nowrap; }
+    pre { background: var(--code); color: var(--code-ink); border-radius: 10px; padding: 16px 18px; overflow: auto; line-height: 1.55; font-size: 13px; }
+    pre code { background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--line); padding: 9px 11px; text-align: left; vertical-align: top; min-width: 120px; }
+    th { background: #f8f9fc; }
+    tr:nth-child(even) td { background: #fcfcfe; }
+    .callout { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 16px 0; }
+    .callout.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+    .callout.danger { border-left-color: var(--danger); background: var(--danger-soft); }
+    .callout p:first-child { margin-top: 0; }
+    .callout p:last-child { margin-bottom: 0; }
+    .steps { counter-reset: step; }
+    .steps > .step { position: relative; padding-left: 44px; margin: 18px 0; counter-increment: step; }
+    .steps > .step::before {
+      content: counter(step);
+      position: absolute; left: 0; top: 1px; width: 29px; height: 29px; border-radius: 50%;
+      background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 700;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 16px 0; }
+    .card { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: #fbfbfe; }
+    .card h4 { margin-top: 0; }
+    details { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 12px 0; background: #fbfbfe; }
+    summary { cursor: pointer; font-weight: 600; }
+    .flow { white-space: pre; overflow-x: auto; }
+    .small { font-size: 13px; color: var(--muted); }
+    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; }
+    @media (max-width: 880px) { .layout { grid-template-columns: 1fr; } aside { position: static; max-height: none; } article { padding: 22px 18px 34px; } header h1 { font-size: 24px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>OpenReel Video 编辑使用攻略</h1>
+      <p>从新建项目到导出成片，按“页面上实际能看到什么”组织的中文操作手册。当前界面按钮仍是英文，文中会同时给出<strong>中文说明</strong>与<strong>英文原文</strong>对照，方便照着点。</p>
+      <div class="badges">
+        <span class="badge">适用：Web 编辑器 apps/web</span>
+        <span class="badge">快捷键：⌘/Ctrl 通用</span>
+        <span class="badge">界面语言：当前为英文</span>
+        <span class="badge">更新：2026-11-19</span>
+      </div>
+      <nav class="links">
+        <a href="./界面英文菜单对照.html">查看《界面英文菜单对照》</a>
+        <a href="./部署与操作指南.html">查看《部署与操作指南》</a>
+        <a href="./工程源码分析.html">查看《工程源码分析》</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <strong>目录</strong>
+      <ol>
+        <li><a href="#quickstart">5 分钟完成第一条视频</a></li>
+        <li><a href="#interface">认识编辑器界面</a></li>
+        <li><a href="#media">导入与摆放素材</a></li>
+        <li><a href="#timeline">时间线剪辑</a></li>
+        <li><a href="#panels">文字、字幕、音频与特效</a></li>
+        <li><a href="#ai">AI 对话编辑</a></li>
+        <li><a href="#export">导出与队列</a></li>
+        <li><a href="#save">保存与恢复</a></li>
+        <li><a href="#shortcuts">快捷键速查</a></li>
+        <li><a href="#mobile">移动端操作</a></li>
+        <li><a href="#faq">常见问题</a></li>
+      </ol>
+    </aside>
+
+    <article>
+      <section id="quickstart">
+        <h2>1. 5 分钟完成第一条视频</h2>
+        <div class="steps">
+          <div class="step">
+            <h3>打开编辑器首页</h3>
+            <p>浏览器访问 <code>http://localhost:5173</code>（开发模式）或线上地址。首次进入会看到欢迎页 <strong>WelcomeScreen</strong>。</p>
+          </div>
+          <div class="step">
+            <h3>选择画幅或模板</h3>
+            <p>点击三个大卡片之一：</p>
+            <ul>
+              <li><strong>Vertical</strong>：竖屏 1080×1920，适合 TikTok / Reels / Shorts。</li>
+              <li><strong>Horizontal</strong>：横屏 1920×1080，适合 YouTube / Vimeo / Web。</li>
+              <li><strong>Square</strong>：方形 1080×1080，适合 Instagram / Facebook。</li>
+            </ul>
+            <p>也可以点 <code>Browse templates</code> 选模板，点 <code>Use Template</code> 后进入编辑器；或点 <code>Recent projects</code> 打开最近项目。</p>
+          </div>
+          <div class="step">
+            <h3>导入素材</h3>
+            <p>在编辑器按 <kbd>⌘/Ctrl+I</kbd>，或点菜单 <code>File → Import media…</code>；也可以从左侧素材面板点 <code>Import</code>，或把本地视频/音频/图片直接拖进左侧素材区。</p>
+          </div>
+          <div class="step">
+            <h3>把素材放到时间线</h3>
+            <p>从左侧素材面板把素材拖到底部时间线的轨道上。时间线顶部的 <code>Track</code> 下拉可以选择 Dialogue / Music / Captions 等轨道类型。</p>
+          </div>
+          <div class="step">
+            <h3>粗剪</h3>
+            <p>用选择工具 <kbd>V</kbd> 选中片段，用刀片工具 <kbd>B</kbd> 或 <kbd>S</kbd> 在播放头处分割，删除不需要的片段；按 <kbd>Space</kbd> 预览。</p>
+          </div>
+          <div class="step">
+            <h3>加点文字和转场</h3>
+            <p>左侧竖栏点 <code>Text &amp; captions</code> 添加文字或自动字幕；点 <code>Transitions</code> 把转场拖到两个片段的接缝处。</p>
+          </div>
+          <div class="step">
+            <h3>导出</h3>
+            <p>点右上角 <code>Export</code>，选择预设或自定义设置，点 <code>Export Video</code>（或先 <code>Add to queue</code>）。</p>
+          </div>
+        </div>
+        <div class="callout">
+          <p>如果页面是英文而你看不惯：当前版本<strong>没有中文界面</strong>。这不是浏览器语言设置问题，而是代码里尚未实现 i18n。详见 <a href="./工程源码分析.html#i18n">源码分析文档中的说明</a>。</p>
+        </div>
+      </section>
+
+      <section id="interface">
+        <h2>2. 认识编辑器界面</h2>
+        <p>编辑器由四个区域组成，布局来自 <code>EditorInterface.tsx</code>：</p>
+        <div class="flow"><code>┌──────────────────────── 顶部工具栏 Toolbar ────────────────────────┐
+│ 项目菜单 | File Edit Clip Sequence Effects View Window Help | 项目名 | 保存状态 | Undo/Redo | Export │
+├──────────┬───────────────────────────────┬──────────────────────────┤
+│ 左侧竖栏  │ 中央预览 Preview               │ 右侧检查器 Inspector       │
+│ ActionRail│ / SourceMonitor / Multicam    │ Video/Audio/Speed/Color/AI │
+│          │                               │ 或 AI 更改面板 Changes      │
+├──────────┴───────────────────────────────┴──────────────────────────┤
+│ 底部时间线 Timeline（轨道、播放头、工具条、缩放）                     │
+└────────────────────────────────────────────────────────────────────┘</code></div>
+
+        <h3>2.1 顶部工具栏</h3>
+        <table>
+          <thead><tr><th>中文含义</th><th>界面原文</th><th>作用</th></tr></thead>
+          <tbody>
+            <tr><td>项目菜单</td><td><code>OpenReel</code></td><td>新建项目、打开项目、备份、项目切换。</td></tr>
+            <tr><td>菜单栏</td><td><code>File / Edit / Clip / Sequence / Effects / View / Window / Help</code></td><td>完整命令入口，包含导入、保存、导出、快捷键等。</td></tr>
+            <tr><td>项目名与画幅</td><td>项目名输入框、<code>1920×1080 · 30 fps</code></td><td>点击可重命名；右侧显示当前尺寸与帧率。</td></tr>
+            <tr><td>保存状态</td><td><code>Saved / Saving… / Unsaved / Save failed</code></td><td>自动保存状态提示。</td></tr>
+            <tr><td>模式切换</td><td><code>Manual / AI assist</code></td><td>手动编辑与 AI 辅助模式切换。</td></tr>
+            <tr><td>撤销/重做</td><td>弯曲箭头图标</td><td>也可使用 <kbd>⌘/Ctrl+Z</kbd> / <kbd>⇧⌘/Ctrl+Z</kbd>。</td></tr>
+            <tr><td>导出队列</td><td>队列图标</td><td>打开 Export queue 面板。</td></tr>
+            <tr><td>协作</td><td><code>Collaborate / Live / Offline</code></td><td>协作会话状态。</td></tr>
+            <tr><td>备份</td><td><code>Backup</code></td><td>项目打包备份，不是公开分享链接。</td></tr>
+            <tr><td>导出</td><td><code>Export</code></td><td>打开导出对话框。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>2.2 左侧功能竖栏</h3>
+        <p>从上到下依次为：</p>
+        <ul>
+          <li><code>AI Editor chat</code> — AI 对话编辑</li>
+          <li><code>Media</code> — 素材库</li>
+          <li><code>Audio</code> — 音频</li>
+          <li><code>Text &amp; captions</code> — 文字与字幕</li>
+          <li><code>Effects</code> — 特效</li>
+          <li><code>Transitions</code> — 转场</li>
+          <li><code>Graphics</code> — 图形</li>
+          <li><code>AI Generate</code> — AI 生成</li>
+          <li><code>Recipes</code> — 配方</li>
+          <li><code>Markers</code> — 标记</li>
+          <li><code>Comments</code> — 评论</li>
+          <li><code>Versions</code> — 版本</li>
+          <li><code>Project settings</code> — 项目设置</li>
+        </ul>
+        <p class="small">右侧检查器会随选中片段类型变化：视频通常是 Video / Audio / Speed / Color / AI；文本则是 Text / Animation / Transform 等。</p>
+      </section>
+
+      <section id="media">
+        <h2>3. 导入与摆放素材</h2>
+        <h3>3.1 三种导入方式</h3>
+        <ol>
+          <li><strong>菜单导入</strong>：<code>File → Import media…</code> 或 <kbd>⌘/Ctrl+I</kbd>。</li>
+          <li><strong>素材面板导入</strong>：左侧素材面板顶部有 <code>Search media</code>、<code>Import</code>、<code>Record</code>。</li>
+          <li><strong>拖拽导入</strong>：从文件管理器把视频/图片/音频拖到左侧素材区。</li>
+        </ol>
+        <h3>3.2 放到时间线</h3>
+        <ul>
+          <li>从素材面板把素材拖到底部时间线轨道上。</li>
+          <li>时间线顶部 <code>Track</code> 下拉可切换 Dialogue / Music / Captions 等轨道类型。</li>
+          <li>拖错轨道可以撤销 <kbd>⌘/Ctrl+Z</kbd>，或用剪切 <kbd>⌘/Ctrl+X</kbd> 后重新粘贴。</li>
+        </ul>
+        <h3>3.3 轨道控制</h3>
+        <p>轨道头上有以下按钮：</p>
+        <ul>
+          <li><code>Lock track</code>：锁定轨道，防止误改。</li>
+          <li><code>Hide track</code>：隐藏轨道画面。</li>
+          <li><code>Mute track</code>：静音。</li>
+          <li><code>Solo track</code>：独奏该轨道。</li>
+          <li><code>Sync Lock</code>：同步锁定。</li>
+        </ul>
+      </section>
+
+      <section id="timeline">
+        <h2>4. 时间线剪辑</h2>
+        <h3>4.1 工具条按钮对照</h3>
+        <table>
+          <thead><tr><th>按钮原文</th><th>快捷键</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr><td>Selection</td><td><kbd>V</kbd></td><td>选择并移动片段。</td></tr>
+            <tr><td>Blade</td><td><kbd>B</kbd></td><td>刀片工具，点击片段切一刀。</td></tr>
+            <tr><td>Split</td><td><kbd>S</kbd></td><td>在播放头处分割选中片段。</td></tr>
+            <tr><td>Ripple trim</td><td><kbd>R</kbd></td><td>波纹修剪。</td></tr>
+            <tr><td>Rate stretch</td><td><kbd>⇧R</kbd></td><td>速率拉伸。</td></tr>
+            <tr><td>Snap on/off</td><td><kbd>N</kbd></td><td>吸附开关，拖片段时自动对齐剪辑点。</td></tr>
+            <tr><td>Add marker</td><td><kbd>M</kbd></td><td>添加标记。</td></tr>
+            <tr><td>Delete</td><td><kbd>Delete</kbd></td><td>删除选中片段，留下空隙。</td></tr>
+            <tr><td>更多工具</td><td><kbd>Q</kbd>/<kbd>W</kbd></td><td>修剪片段起点/终点。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>4.2 常用编辑动作</h3>
+        <table>
+          <thead><tr><th>中文动作</th><th>快捷键（macOS / Windows）</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>撤销 / 重做</td><td><kbd>⌘Z</kbd> / <kbd>Ctrl+Z</kbd>；<kbd>⇧⌘Z</kbd> / <kbd>Ctrl+Shift+Z</kbd></td><td>所有编辑都有历史记录。</td></tr>
+            <tr><td>剪切 / 复制 / 粘贴</td><td><kbd>⌘X/C/V</kbd> / <kbd>Ctrl+X/C/V</kbd></td><td>常规剪辑操作。</td></tr>
+            <tr><td>粘贴插入</td><td><kbd>⇧⌘V</kbd> / <kbd>Ctrl+Shift+V</kbd></td><td>粘贴到播放头并推动后续片段。</td></tr>
+            <tr><td>复制片段</td><td><kbd>⌘D</kbd> / <kbd>Ctrl+D</kbd></td><td>快速生成副本。</td></tr>
+            <tr><td>波纹删除</td><td><kbd>Shift+Delete</kbd></td><td>删除片段并自动闭合空隙。</td></tr>
+            <tr><td>分割</td><td><kbd>S</kbd></td><td>在播放头处切开。</td></tr>
+            <tr><td>修剪起点/终点</td><td><kbd>Q</kbd> / <kbd>W</kbd></td><td>按播放头修剪片段首尾。</td></tr>
+            <tr><td>缩放时间线</td><td><kbd>⌘=</kbd> / <kbd>⌘-</kbd> / <kbd>⌘0</kbd></td><td>放大、缩小、适配。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>4.3 变速</h3>
+        <p>选中片段后，在右侧检查器切到 <code>Speed</code> 标签。预设范围为 0.25× 到 5×，也可以填自定义速度；勾选 <code>Apply speed to audio</code> 可让音频一起变速。</p>
+
+        <div class="callout warn">
+          <p>删除片段默认会留下空隙；如果你希望后面的片段自动前移，请使用<strong>波纹删除</strong>（<kbd>Shift+Delete</kbd>），不要按普通 <kbd>Delete</kbd>。</p>
+        </div>
+      </section>
+
+      <section id="panels">
+        <h2>5. 文字、字幕、音频与特效</h2>
+        <h3>5.1 文字与字幕</h3>
+        <p>左侧竖栏点 <code>Text &amp; captions</code>，面板顶部有标签：</p>
+        <ul>
+          <li><code>Text</code>：文字样式。</li>
+          <li><code>Captions</code>：字幕。</li>
+          <li><code>Transcript</code>：转录文本。</li>
+          <li><code>QC</code>：字幕质检。</li>
+          <li><code>Saved styles</code>：保存的样式。</li>
+        </ul>
+        <p>常用按钮：</p>
+        <ul>
+          <li><code>Add plain text</code>：添加普通文字。</li>
+          <li><code>TITLES</code> / <code>LOWER THIRDS</code>：标题与下三分之一字幕模板。</li>
+          <li><code>Auto captions</code>：自动生成字幕。</li>
+          <li><code>Caption language</code>：选择转写语言。注意这是<strong>媒体语言</strong>，不是界面语言。</li>
+          <li><code>Generate captions</code>：开始生成。</li>
+        </ul>
+
+        <h3>5.2 特效与转场</h3>
+        <p>左侧竖栏点 <code>Effects</code> 或 <code>Transitions</code>：</p>
+        <ul>
+          <li>特效面板提示 <code>Effects · Drag onto a clip</code>：把特效拖到片段上。</li>
+          <li>转场面板提示 <code>Drop on a cut</code>：把转场拖到两个片段的接缝处。</li>
+          <li>面板顶部有搜索框，可以按名称筛选。</li>
+        </ul>
+
+        <h3>5.3 关键帧与调色</h3>
+        <ul>
+          <li>菜单 <code>Effects → Keyframe editor</code> 打开关键帧面板；可复制/粘贴/删除关键帧，并调整 Easing 缓动。</li>
+          <li>右侧检查器 <code>Color</code> 标签提供曲线、色相曲线等调色工具；快捷键 <kbd>Shift+S</kbd> 可切换示波器。</li>
+        </ul>
+
+        <h3>5.4 音频与多机位</h3>
+        <ul>
+          <li>菜单 <code>Window → Audio mixer</code> 打开混音器。</li>
+          <li>菜单 <code>Sequence</code> 下有 <code>Create multi-camera source</code>、<code>Multi-camera monitor</code>、<code>Flatten</code>、<code>Multi-camera editing</code> 等入口。</li>
+          <li>多机位监视器会叠加在中央预览区上方。</li>
+        </ul>
+      </section>
+
+      <section id="ai">
+        <h2>6. AI 对话编辑</h2>
+        <h3>6.1 打开对话面板</h3>
+        <p>三种方式：</p>
+        <ul>
+          <li>顶部工具栏切到 <code>AI assist</code>。</li>
+          <li>左侧竖栏点 <code>AI Editor chat</code>。</li>
+          <li>菜单 <code>View → AI assist</code>。</li>
+        </ul>
+        <p>如果还没有连接模型，会先弹出连接对话框；未连接时发送按钮不可用。</p>
+
+        <h3>6.2 输入需求</h3>
+        <p>输入框占位文案是：</p>
+        <pre><code>Describe an edit… e.g. "make a 9:16 version with captions"</code></pre>
+        <p>示例提示词：</p>
+        <ul>
+          <li><code>Add captions</code></li>
+          <li><code>Make a 9:16 version</code></li>
+          <li><code>Balance audio</code></li>
+        </ul>
+        <p>按 <kbd>Enter</kbd> 发送，<kbd>Shift+Enter</kbd> 换行。</p>
+
+        <h3>6.3 确认工具调用与查看更改</h3>
+        <ol>
+          <li>AI 返回工具调用卡片后，会显示工具名与参数。</li>
+          <li>点 <code>Approve</code> 执行单个操作；<code>Approve all this turn</code> 批准本轮全部；<code>Reject</code> 拒绝。</li>
+          <li>右侧检查器会变成 <code>Changes</code> 面板，可点击跳转到具体编辑点。</li>
+          <li>不满意可点 <code>Undo all</code> 撤销本轮，或 <code>Keep all</code> 保留。</li>
+        </ol>
+      </section>
+
+      <section id="export">
+        <h2>7. 导出与队列</h2>
+        <h3>7.1 打开导出对话框</h3>
+        <ul>
+          <li>右上角 <code>Export</code> 按钮。</li>
+          <li>菜单 <code>File → Export…</code>（<kbd>⌘/Ctrl+E</kbd>）。</li>
+          <li><code>Quick export</code> 子菜单可直接使用预设。</li>
+        </ul>
+
+        <h3>7.2 导出设置</h3>
+        <p>对话框会提示 <code>Choose a ready-made preset or fine-tune every setting.</code>，顶部先选择导出范围：</p>
+        <ul>
+          <li><code>Entire timeline</code>：整条时间线。</li>
+          <li><code>Marked In/Out</code>：只导出标记的入点与出点之间。</li>
+        </ul>
+        <p>四个页签：</p>
+        <table>
+          <thead><tr><th>页签</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr><td><code>Presets</code></td><td>现成预设，按平台与推荐场景分类。</td></tr>
+            <tr><td><code>Smaller File</code></td><td>体积优先，压缩导出。</td></tr>
+            <tr><td><code>Custom Settings</code></td><td>完全自定义格式、编码、分辨率、码率、帧率。</td></tr>
+            <tr><td><code>Images &amp; GIF</code></td><td>导出图片序列或 GIF。</td></tr>
+          </tbody>
+        </table>
+        <p>常见格式与编码：</p>
+        <ul>
+          <li>容器：MP4 / WebM / MOV；桌面端额外支持 MXF。</li>
+          <li>视频编码：H.264 / H.265 / ProRes / DNxHR / XDCAM HD422 / AVC-Intra / VP9 / AV1。</li>
+          <li>音频编码：AAC / MP3 / WAV。</li>
+        </ul>
+        <p>底部按钮：</p>
+        <ul>
+          <li><code>Add to queue</code>：加入导出队列，稍后统一处理。</li>
+          <li><code>Export Video</code>：立即导出。</li>
+          <li>Smaller File 页签下为 <code>Compress &amp; Export</code>。</li>
+        </ul>
+
+        <h3>7.3 导出队列</h3>
+        <p>点顶部队列图标打开 <code>Export queue</code> 面板，可启动/暂停任务，也可导出 stems（分轨）。</p>
+
+        <div class="callout warn">
+          <p>浏览器端无法使用部分专业编码器：ProRes、DNxHR、XDCAM、AVC-Intra、MXF、透明通道、高位深等需要桌面版编码器。导出对话框内会有提示。</p>
+        </div>
+      </section>
+
+      <section id="save">
+        <h2>8. 保存与恢复</h2>
+        <h3>8.1 自动保存</h3>
+        <p>应用默认每 30 秒自动保存一次，保留 3 个槽位，输入停止 2 秒后触发。顶部保存状态会显示：</p>
+        <ul>
+          <li><code>Saved</code>：已保存。</li>
+          <li><code>Saving…</code>：正在保存。</li>
+          <li><code>Unsaved</code>：有未保存修改。</li>
+          <li><code>Save failed</code>：保存失败。</li>
+        </ul>
+        <p>自动保存开关与间隔可以在项目设置的 <code>General</code> 面板调整。</p>
+
+        <h3>8.2 手动保存与打开</h3>
+        <ul>
+          <li>菜单 <code>File → Save</code>（<kbd>⌘/Ctrl+S</kbd>）。</li>
+          <li><code>Save as…</code>（<kbd>⇧⌘/Ctrl+S</kbd>）。</li>
+          <li><code>Save version</code> 保存版本。</li>
+          <li><code>Open project…</code> 打开项目文件。</li>
+          <li>项目菜单 <code>Project backups</code> 查看备份。</li>
+        </ul>
+
+        <h3>8.3 崩溃恢复</h3>
+        <p>下次打开时如果发现未保存工程，会弹出 <code>We found an unsaved project</code> 恢复对话框，可选择 <code>Recover</code> 或 <code>Clear all</code>。</p>
+      </section>
+
+      <section id="shortcuts">
+        <h2>9. 快捷键速查</h2>
+        <p class="small">macOS 显示 ⌘，Windows/Linux 对应 Ctrl；应用内 <kbd>?</kbd> 可打开 <code>Keyboard Shortcuts</code> 面板，支持搜索、改键、切换预设（CapCut / Premiere / Final Cut / DaVinci）和 Reset All。</p>
+
+        <h3>9.1 播放与定位</h3>
+        <table>
+          <thead><tr><th>快捷键</th><th>动作</th></tr></thead>
+          <tbody>
+            <tr><td><kbd>Space</kbd></td><td>播放 / 暂停。</td></tr>
+            <tr><td><kbd>J</kbd> / <kbd>K</kbd> / <kbd>L</kbd></td><td>快退 / 停止 / 快进；选中片段时动态修剪。</td></tr>
+            <tr><td><kbd>←</kbd> / <kbd>→</kbd></td><td>逐帧移动。</td></tr>
+            <tr><td><kbd>Shift+←</kbd> / <kbd>Shift+→</kbd></td><td>前后移动 1 秒。</td></tr>
+            <tr><td><kbd>↑</kbd> / <kbd>↓</kbd></td><td>前后移动 5 秒。</td></tr>
+            <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>跳到开头 / 结尾。</td></tr>
+            <tr><td><kbd>I</kbd> / <kbd>O</kbd></td><td>设置入点 / 出点。</td></tr>
+            <tr><td><kbd>[</kbd> / <kbd>]</kbd></td><td>跳到上一个 / 下一个剪辑点。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>9.2 编辑</h3>
+        <table>
+          <thead><tr><th>快捷键</th><th>动作</th></tr></thead>
+          <tbody>
+            <tr><td><kbd>⌘/Ctrl+Z</kbd> / <kbd>⇧⌘/Ctrl+Z</kbd></td><td>撤销 / 重做。</td></tr>
+            <tr><td><kbd>⌘/Ctrl+X/C/V</kbd></td><td>剪切 / 复制 / 粘贴。</td></tr>
+            <tr><td><kbd>⇧⌘/Ctrl+V</kbd></td><td>粘贴插入。</td></tr>
+            <tr><td><kbd>⌘/Ctrl+D</kbd></td><td>复制片段。</td></tr>
+            <tr><td><kbd>Delete</kbd> / <kbd>Shift+Delete</kbd></td><td>删除 / 波纹删除。</td></tr>
+            <tr><td><kbd>S</kbd></td><td>分割。</td></tr>
+            <tr><td><kbd>Q</kbd> / <kbd>W</kbd></td><td>修剪起点 / 终点。</td></tr>
+            <tr><td><kbd>,</kbd> / <kbd>.</kbd></td><td>插入 / 覆盖。</td></tr>
+            <tr><td><kbd>;</kbd> / <kbd>'</kbd></td><td>Lift / Extract。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>9.3 视图、文件与工具</h3>
+        <table>
+          <thead><tr><th>快捷键</th><th>动作</th></tr></thead>
+          <tbody>
+            <tr><td><kbd>?</kbd></td><td>打开快捷键面板。</td></tr>
+            <tr><td><kbd>⌘/Ctrl+K</kbd></td><td>全局搜索效果与工具。</td></tr>
+            <tr><td><kbd>⌘/Ctrl+I</kbd></td><td>导入媒体。</td></tr>
+            <tr><td><kbd>⌘/Ctrl+S</kbd></td><td>保存项目。</td></tr>
+            <tr><td><kbd>⌘/Ctrl+E</kbd></td><td>导出。</td></tr>
+            <tr><td><kbd>⇧⌘/Ctrl+J</kbd></td><td>协作。</td></tr>
+            <tr><td><kbd>T</kbd></td><td>添加文字。</td></tr>
+            <tr><td><kbd>M</kbd></td><td>添加标记。</td></tr>
+            <tr><td><kbd>N</kbd></td><td>吸附开关。</td></tr>
+            <tr><td><kbd>Shift+S</kbd> / <kbd>Shift+P</kbd> / <kbd>Shift+C</kbd></td><td>示波器 / 代理 / 对比视图。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="mobile">
+        <h2>10. 移动端与触屏操作</h2>
+        <p>手机判定条件为宽度 ≤600px 且为触摸设备；紧凑平板为 ≤1366px 且触摸。</p>
+        <ul>
+          <li>手机顶部会出现 <code>Back to timeline</code>、<code>Library</code>、<code>AI assist</code>、<code>Clip controls</code>。</li>
+          <li>紧凑布局底部页签为 <code>Timeline / Media / Edit / AI</code>。</li>
+          <li>手机底部工具坞包含 Edit / Audio / Text / Captions / Effects / Find tool，以及 Split / Speed / Volume / Animate / Crop / Filters / Replace / Delete 等快捷动作。</li>
+          <li>手机时间线的 <code>+</code> 菜单对应 <code>Add media</code>。</li>
+          <li>AI 聊天在手机上改为 Sheet 形式；侧栏不再常驻。</li>
+        </ul>
+        <div class="callout warn">
+          <p>手机端会裁剪部分桌面功能，且某些工具会根据选择状态或权限置灰。如果找不到某个专业功能，请换桌面浏览器或使用桌面版。</p>
+        </div>
+      </section>
+
+      <section id="faq">
+        <h2>11. 常见问题</h2>
+        <details open>
+          <summary>11.1 界面为什么是英文？能切换中文吗？</summary>
+          <p>当前版本没有实现 UI 国际化：没有语言包、没有语言 Provider、没有切换入口，按钮文案硬编码在组件里。<code>Caption language</code> 只是字幕转写语言，不是界面语言。需要开发翻译层后才能支持中文。</p>
+        </details>
+        <details>
+          <summary>11.2 找不到 Motion Creator？</summary>
+          <p>特性开关 <code>MOTION_CREATOR_ENABLED = false</code>，<code>#/motion</code> 会回落到标准编辑器。目前该项未开放。</p>
+        </details>
+        <details>
+          <summary>11.3 AI 对话不能发送？</summary>
+          <p>需要先在 <code>Connect a model</code> 对话框配置 LLM 服务（OpenAI / Anthropic / OpenAI-compatible 等）。未连接时发送按钮禁用。</p>
+        </details>
+        <details>
+          <summary>11.4 导出 ProRes / MXF 失败？</summary>
+          <p>这些专业编码依赖桌面版 ffmpeg 编码器；浏览器端会提示不可用。请使用桌面应用，或改选 H.264 / H.265 / VP9 等浏览器支持的编码。</p>
+        </details>
+        <details>
+          <summary>11.5 预览卡顿或没有 GPU 加速？</summary>
+          <p>应用会在没有 WebGPU 时回退到 Canvas2D；功能仍可用，但 4K 或复杂特效性能下降。建议使用 Chrome/Edge 并开启硬件加速。</p>
+        </details>
+        <details>
+          <summary>11.6 打开页面空白或素材处理异常？</summary>
+          <p>开发部署时可能漏了 <code>pnpm build:wasm</code>。详见 <a href="./部署与操作指南.html">部署与操作指南</a> 的“首次本地部署”章节。</p>
+        </details>
+        <details>
+          <summary>11.7 按钮名称和本文对不上？</summary>
+          <p>本文按当前代码中的英文原文对照编写。若产品后续更新了文案，请以页面实际显示为准，并用 <kbd>⌘/Ctrl+K</kbd> 全局搜索工具名。</p>
+        </details>
+      </section>
+
+      <p class="small" style="margin-top:36px">相关文档：<a href="./界面英文菜单对照.html">界面英文菜单对照</a> ｜ <a href="./部署与操作指南.html">部署与操作指南</a> ｜ <a href="./工程源码分析.html">工程源码分析</a></p>
+    </article>
+  </div>
+
+  <footer>
+    本文档由工程静态分析生成，操作名称以当前页面英文文案为准。更新：2026-11-19。
+  </footer>
+</body>
+</html>

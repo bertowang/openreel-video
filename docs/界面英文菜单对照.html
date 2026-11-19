@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenReel Video 界面英文菜单对照</title>
+  <style>
+    :root {
+      --bg: #f7f7fb;
+      --panel: #fff;
+      --ink: #202431;
+      --muted: #616a7a;
+      --line: #e4e7ef;
+      --accent: #b45309;
+      --accent-2: #4338ca;
+      --accent-soft: #fffbeb;
+      --ok: #047857;
+      --ok-soft: #ecfdf5;
+      --danger: #b91c1c;
+      --danger-soft: #fef2f2;
+      --code: #111827;
+      --code-ink: #e5e7eb;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(32, 36, 49, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.75;
+      font-size: 15px;
+    }
+    a { color: var(--accent-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header {
+      background: linear-gradient(135deg, #78350f, #b45309 55%, #4338ca);
+      color: #fff;
+      padding: 34px 24px 28px;
+    }
+    .wrap { max-width: 1240px; margin: 0 auto; }
+    header h1 { margin: 0 0 8px; font-size: 30px; }
+    header p { margin: 0; max-width: 900px; opacity: .94; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .badge { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); }
+    .links { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 16px; }
+    .links a { color: #fff; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; }
+    .layout { max-width: 1240px; margin: 24px auto 60px; padding: 0 20px; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; align-items: start; }
+    aside { position: sticky; top: 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 16px; box-shadow: var(--shadow); max-height: calc(100vh - 40px); overflow: auto; }
+    aside strong { display: block; color: var(--muted); font-size: 12px; letter-spacing: .1em; margin-bottom: 10px; }
+    aside ol { padding-left: 20px; margin: 0; }
+    aside li { margin: 5px 0; }
+    aside a { color: var(--ink); font-size: 13px; }
+    article { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px 36px 46px; box-shadow: var(--shadow); min-width: 0; }
+    h2 { margin: 42px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--accent-soft); font-size: 22px; scroll-margin-top: 20px; }
+    h2:first-of-type { margin-top: 6px; }
+    h3 { margin: 26px 0 10px; font-size: 17px; color: #92400e; }
+    h4 { margin: 18px 0 8px; font-size: 15px; color: #3730a3; }
+    p { margin: 10px 0; }
+    ul, ol { padding-left: 22px; }
+    li { margin: 5px 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f5f5f8; border: 1px solid #e5e8f0; border-radius: 5px; padding: 1px 5px; font-size: .9em; }
+    kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f8fafc; border: 1px solid #cbd5e1; border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; font-size: 12px; white-space: nowrap; }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; min-width: 150px; }
+    th { background: #fff8ed; font-weight: 600; }
+    tr:nth-child(even) td { background: #fcfcfe; }
+    .en { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #92400e; font-size: 13px; }
+    .zh { font-weight: 600; color: #0f5f59; }
+    .callout { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 16px 0; }
+    .callout.ok { border-left-color: var(--ok); background: var(--ok-soft); }
+    .callout.danger { border-left-color: var(--danger); background: var(--danger-soft); }
+    .pill { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: #eef2ff; color: #3730a3; }
+    .small { font-size: 13px; color: var(--muted); }
+    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; }
+    @media (max-width: 880px) { .layout { grid-template-columns: 1fr; } aside { position: static; max-height: none; } article { padding: 22px 18px 34px; } header h1 { font-size: 24px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>OpenReel Video 界面英文菜单对照</h1>
+      <p>当前应用界面文案为英文。本文按页面区域整理常见菜单、按钮、标签和状态提示，给出<strong>英文原文 → 中文译法 → 含义说明</strong>，方便对照操作。可用浏览器 <kbd>⌘/Ctrl+F</kbd> 搜索英文原文快速定位。</p>
+      <div class="badges">
+        <span class="badge">面向：页面操作者</span>
+        <span class="badge">范围：apps/web 当前英文文案</span>
+        <span class="badge">含：菜单 / 按钮 / 状态 / 设置</span>
+        <span class="badge">更新：2026-11-19</span>
+      </div>
+      <nav class="links">
+        <a href="./编辑使用攻略.html">查看《编辑使用攻略》</a>
+        <a href="./部署与操作指南.html">查看《部署与操作指南》</a>
+        <a href="./工程源码分析.html">查看《工程源码分析》</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <strong>目录</strong>
+      <ol>
+        <li><a href="#usage">使用说明</a></li>
+        <li><a href="#welcome">欢迎页</a></li>
+        <li><a href="#toolbar">顶部工具栏</a></li>
+        <li><a href="#menubar">应用菜单 File–Help</a></li>
+        <li><a href="#rail">左侧功能竖栏</a></li>
+        <li><a href="#timeline">时间线与轨道</a></li>
+        <li><a href="#assets">素材面板</a></li>
+        <li><a href="#text">文字与字幕</a></li>
+        <li><a href="#effects">特效与转场</a></li>
+        <li><a href="#inspector">检查器标签</a></li>
+        <li><a href="#export">导出对话框</a></li>
+        <li><a href="#ai">AI 对话面板</a></li>
+        <li><a href="#save">保存与恢复</a></li>
+        <li><a href="#shortcuts">快捷键面板</a></li>
+        <li><a href="#settings">项目设置</a></li>
+        <li><a href="#status">常见状态与提示</a></li>
+      </ol>
+    </aside>
+
+    <article>
+      <section id="usage">
+        <h2>1. 使用说明</h2>
+        <div class="callout">
+          <p>下表“英文原文”一列尽量保留页面上的大小写、省略号和符号；中文译法是为了便于理解，不是官方本地化。带 <span class="pill">aria</span> 的条目通常是无障碍标签或悬停提示，不一定直接显示在界面上。</p>
+        </div>
+        <p>如果你只是想按步骤完成剪辑，请先阅读 <a href="./编辑使用攻略.html">《编辑使用攻略》</a>；本文更适合“看到英文不知道什么意思”时查阅。</p>
+      </section>
+
+      <section id="welcome">
+        <h2>2. 欢迎页 Welcome</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Vertical</td><td class="zh">竖屏</td><td>1080×1920，适合 TikTok / Reels / Shorts。</td></tr>
+            <tr><td class="en">Horizontal</td><td class="zh">横屏</td><td>1920×1080，适合 YouTube / Vimeo / Web。</td></tr>
+            <tr><td class="en">Square</td><td class="zh">方形</td><td>1080×1080，适合 Instagram / Facebook。</td></tr>
+            <tr><td class="en">Start creating</td><td class="zh">开始创作</td><td>画幅卡片悬停提示，点击创建对应项目。</td></tr>
+            <tr><td class="en">New ... Video</td><td class="zh">新建…视频</td><td>按画幅命名的新项目默认名，如 New Vertical Video。</td></tr>
+            <tr><td class="en">Browse templates</td><td class="zh">浏览模板</td><td>打开模板库。</td></tr>
+            <tr><td class="en">Recent projects</td><td class="zh">最近项目</td><td>查看本机最近打开的项目。</td></tr>
+            <tr><td class="en">Open editor</td><td class="zh">打开编辑器</td><td>直接进入编辑器。</td></tr>
+            <tr><td class="en">Skip on startup</td><td class="zh">启动时跳过</td><td>以后启动不再显示欢迎页。</td></tr>
+            <tr><td class="en">Setup</td><td class="zh">设置 / 引导</td><td>重新打开首次使用引导条。</td></tr>
+            <tr><td class="en">Press Esc to skip</td><td class="zh">按 Esc 跳过</td><td>键盘跳过引导。</td></tr>
+            <tr><td class="en">From idea to export.</td><td class="zh">从创意到成片。</td><td>欢迎页主标语。</td></tr>
+            <tr><td class="en">In your browser. / On your desktop.</td><td class="zh">在你的浏览器中 / 在你的桌面上</td><td>区分 Web 版与桌面版。</td></tr>
+            <tr><td class="en">Back</td><td class="zh">返回</td><td>从模板页/最近项目页返回。</td></tr>
+            <tr><td class="en">Templates</td><td class="zh">模板</td><td>模板二级页标题。</td></tr>
+            <tr><td class="en">Recent Projects</td><td class="zh">最近项目</td><td>最近项目二级页标题。</td></tr>
+            <tr><td class="en">Loading…</td><td class="zh">加载中…</td><td>通用加载状态。</td></tr>
+            <tr><td class="en">Use Template</td><td class="zh">使用模板</td><td>应用所选模板并进入编辑器。</td></tr>
+            <tr><td class="en">Search templates…</td><td class="zh">搜索模板…</td><td>模板库搜索框。</td></tr>
+            <tr><td class="en">Retry loading templates</td><td class="zh">重试加载模板</td><td>模板加载失败时的重试按钮。</td></tr>
+            <tr><td class="en">No templates found</td><td class="zh">未找到模板</td><td>模板搜索空态。</td></tr>
+            <tr><td class="en">All / TikTok / Instagram / YouTube / Facebook / Twitter/X / LinkedIn / Pinterest / General</td><td class="zh">全部 / 各平台 / 通用</td><td>模板平台筛选页签。</td></tr>
+            <tr><td class="en">Remove from recent</td><td class="zh">从最近中移除</td><td>从最近项目列表删除条目。</td></tr>
+            <tr><td class="en">Recent projects are stored locally on this device/browser</td><td class="zh">最近项目仅存储在本机/浏览器</td><td>隐私说明。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="toolbar">
+        <h2>3. 顶部工具栏 Toolbar</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Project menu</td><td class="zh">项目菜单</td><td>新建、打开、备份、切换项目。</td></tr>
+            <tr><td class="en">Project name</td><td class="zh">项目名</td><td>可点击重命名当前项目。</td></tr>
+            <tr><td class="en">fps</td><td class="zh">帧率</td><td>显示当前项目帧率，如 30 fps。</td></tr>
+            <tr><td class="en">Manual</td><td class="zh">手动</td><td>传统手动编辑模式。</td></tr>
+            <tr><td class="en">AI assist</td><td class="zh">AI 辅助</td><td>打开 AI 对话编辑侧栏。</td></tr>
+            <tr><td class="en">Undo / Redo</td><td class="zh">撤销 / 重做</td><td>历史操作回退与恢复。</td></tr>
+            <tr><td class="en">Collaborate</td><td class="zh">协作</td><td>开启多人实时协作。</td></tr>
+            <tr><td class="en">Live / Offline / Joining…</td><td class="zh">在线 / 离线 / 加入中…</td><td>协作连接状态。</td></tr>
+            <tr><td class="en">Backup</td><td class="zh">备份</td><td>打包项目备份，不是公开分享链接。</td></tr>
+            <tr><td class="en">Export</td><td class="zh">导出</td><td>打开导出对话框。</td></tr>
+            <tr><td class="en">Action history</td><td class="zh">操作历史</td><td>查看每一步编辑操作。</td></tr>
+            <tr><td class="en">Close action history</td><td class="zh">关闭操作历史</td><td>关闭历史侧栏。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="menubar">
+        <h2>4. 应用菜单 File / Edit / Clip / Sequence / Effects / View / Window / Help</h2>
+
+        <h3>4.1 File — 文件</h3>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">New project…</td><td class="zh">新建项目…</td><td>创建新项目。</td></tr>
+            <tr><td class="en">Open project…</td><td class="zh">打开项目…</td><td>打开本地项目文件。</td></tr>
+            <tr><td class="en">Import media…</td><td class="zh">导入媒体…</td><td>导入视频/音频/图片。</td></tr>
+            <tr><td class="en">Record screen or camera…</td><td class="zh">录制屏幕或相机…</td><td>打开录制面板。</td></tr>
+            <tr><td class="en">Save project…</td><td class="zh">保存项目…</td><td>保存当前工程。</td></tr>
+            <tr><td class="en">Save project as…</td><td class="zh">另存项目为…</td><td>写入新文件并继续在其中工作。</td></tr>
+            <tr><td class="en">Save version…</td><td class="zh">保存版本…</td><td>创建可恢复的命名快照。</td></tr>
+            <tr><td class="en">Export…</td><td class="zh">导出…</td><td>打开导出对话框。</td></tr>
+            <tr><td class="en">Quick export</td><td class="zh">快速导出</td><td>直接用预设导出。</td></tr>
+            <tr><td class="en">Collaborate…</td><td class="zh">协作…</td><td>与他人实时编辑同一项目。</td></tr>
+            <tr><td class="en">Compress video…</td><td class="zh">压缩视频…</td><td>体积优先导出。</td></tr>
+            <tr><td class="en">Embed CEA-608 captions…</td><td class="zh">嵌入 CEA-608 字幕…</td><td>将字幕写入 H.264 SEI 流，无需重编码。</td></tr>
+            <tr><td class="en">Export timeline</td><td class="zh">导出时间线</td><td>交给其他剪辑软件继续编辑。</td></tr>
+            <tr><td class="en">Timeline XML (Premiere/Resolve)</td><td class="zh">时间线 XML</td><td>Final Cut Pro 7 XML (xmeml v5)。</td></tr>
+            <tr><td class="en">FCPXML (Final Cut)</td><td class="zh">FCPXML</td><td>Final Cut Pro X 格式。</td></tr>
+            <tr><td class="en">EDL</td><td class="zh">EDL 编辑决策表</td><td>CMX3600，每个视频轨一个文件。</td></tr>
+            <tr><td class="en">OpenTimelineIO</td><td class="zh">OTIO 时间线交换</td><td>OTIO JSON。</td></tr>
+            <tr><td class="en">AAF (Avid/Premiere/Resolve)</td><td class="zh">AAF</td><td>轨道、速度、叠化、电平、标记；媒体按路径链接。</td></tr>
+            <tr><td class="en">Include markers: on/off</td><td class="zh">包含标记：开/关</td><td>切换导出是否携带标记。</td></tr>
+            <tr><td class="en">Choose sequence…</td><td class="zh">选择序列…</td><td>导出任意序列，不限当前序列。</td></tr>
+            <tr><td class="en">Import timeline</td><td class="zh">导入时间线</td><td>从外部格式导入序列。</td></tr>
+            <tr><td class="en">Timeline XML… / AAF…</td><td class="zh">时间线 XML / AAF</td><td>对应导入格式。</td></tr>
+            <tr><td class="en">Settings &amp; API keys…</td><td class="zh">设置与 API 密钥…</td><td>打开全局设置面板。</td></tr>
+            <tr><td class="en">Back to home</td><td class="zh">返回首页</td><td>回到欢迎页。</td></tr>
+            <tr><td class="en">Hand off to another editor</td><td class="zh">移交给其他剪辑器</td><td>导出时间线子菜单标题。</td></tr>
+            <tr><td class="en">Bring in a sequence</td><td class="zh">导入序列</td><td>导入时间线子菜单标题。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>4.2 Edit — 编辑</h3>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Undo / Redo</td><td class="zh">撤销 / 重做</td><td>历史回退与恢复。</td></tr>
+            <tr><td class="en">Cut / Copy / Paste</td><td class="zh">剪切 / 复制 / 粘贴</td><td>片段级剪贴板操作。</td></tr>
+            <tr><td class="en">Duplicate</td><td class="zh">复制副本</td><td>生成选中片段副本。</td></tr>
+            <tr><td class="en">Delete</td><td class="zh">删除</td><td>删除选中片段，保留空隙。</td></tr>
+            <tr><td class="en">Select all</td><td class="zh">全选</td><td>选中全部片段。</td></tr>
+            <tr><td class="en">Find a tool or effect…</td><td class="zh">查找工具或效果…</td><td>打开全局搜索。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>4.3 Clip — 片段</h3>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Split at playhead</td><td class="zh">在播放头处分割</td><td>把片段切成两段。</td></tr>
+            <tr><td class="en">Trim start to playhead</td><td class="zh">修剪起点到播放头</td><td>剪掉播放头之前的部分。</td></tr>
+            <tr><td class="en">Trim end to playhead</td><td class="zh">修剪终点到播放头</td><td>剪掉播放头之后的部分。</td></tr>
+            <tr><td class="en">Ripple delete</td><td class="zh">波纹删除</td><td>删除并自动闭合空隙。</td></tr>
+            <tr><td class="en">Insert selected media</td><td class="zh">插入所选媒体</td><td>插入到播放头并推动后续片段。</td></tr>
+            <tr><td class="en">Overwrite with selected media</td><td class="zh">用所选媒体覆盖</td><td>覆盖目标区域。</td></tr>
+            <tr><td class="en">Lift In/Out range</td><td class="zh">提取入出点范围</td><td>移除片段但留下空隙。</td></tr>
+            <tr><td class="en">Extract In/Out range</td><td class="zh">抽取入出点范围</td><td>移除并闭合空隙。</td></tr>
+            <tr><td class="en">Add edit to all tracks</td><td class="zh">给所有轨道添加编辑点</td><td>在所有轨道同时切一刀。</td></tr>
+            <tr><td class="en">Add edit to targeted tracks</td><td class="zh">给目标轨道添加编辑点</td><td>只在目标轨道切。</td></tr>
+            <tr><td class="en">Paste insert</td><td class="zh">粘贴插入</td><td>粘贴并推动后续片段。</td></tr>
+            <tr><td class="en">Toggle track target</td><td class="zh">切换轨道目标</td><td>设定片段落点轨。</td></tr>
+            <tr><td class="en">Toggle sync lock</td><td class="zh">切换同步锁定</td><td>波纹编辑时保持轨道同步。</td></tr>
+            <tr><td class="en">Extend edit to playhead</td><td class="zh">延长编辑到播放头</td><td>把片段边界延到播放头。</td></tr>
+            <tr><td class="en">Extend video / audio edit to playhead</td><td class="zh">延长视频/音频编辑到播放头</td><td>分别处理视频或音频。</td></tr>
+            <tr><td class="en">J-cut (audio leads) / L-cut (audio trails)</td><td class="zh">J 型剪辑（音频先行）/ L 型剪辑（音频滞后）</td><td>音画错开的剪辑方式。</td></tr>
+            <tr><td class="en">Match frame</td><td class="zh">匹配帧</td><td>在源中定位当前帧。</td></tr>
+            <tr><td class="en">Replace with linked composition</td><td class="zh">替换为链接合成</td><td>用合成内容替换片段。</td></tr>
+            <tr><td class="en">Open linked composition</td><td class="zh">打开链接合成</td><td>进入合成编辑窗口。</td></tr>
+            <tr><td class="en">Render and replace / Restore unrendered</td><td class="zh">渲染并替换 / 恢复未渲染</td><td>生成代理或恢复原片。</td></tr>
+            <tr><td class="en">Reset clip transform</td><td class="zh">重置片段变换</td><td>还原位置/缩放/旋转。</td></tr>
+            <tr><td class="en">Add text</td><td class="zh">添加文字</td><td>添加文字片段。</td></tr>
+            <tr><td class="en">Keyframe editor</td><td class="zh">关键帧编辑器</td><td>打开关键帧面板。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>4.4 Sequence / Effects / View / Window / Help</h3>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Project settings</td><td class="zh">项目设置</td><td>画幅、帧率、自动保存等设置。</td></tr>
+            <tr><td class="en">Create multi-camera source…</td><td class="zh">创建多机位源…</td><td>把多个角度合成一个源。</td></tr>
+            <tr><td class="en">Multi-camera monitor / Multi-camera editing…</td><td class="zh">多机位监视器 / 多机位编辑…</td><td>多机位切换与编辑。</td></tr>
+            <tr><td class="en">Flatten multi-camera</td><td class="zh">扁平化多机位</td><td>把多机位结果转成普通片段。</td></tr>
+            <tr><td class="en">Add video / audio track</td><td class="zh">添加视频/音频轨道</td><td>新增轨道。</td></tr>
+            <tr><td class="en">Fit timeline</td><td class="zh">适配时间线</td><td>缩放到适合窗口。</td></tr>
+            <tr><td class="en">Toggle snapping</td><td class="zh">切换吸附</td><td>开关自动对齐。</td></tr>
+            <tr><td class="en">Render In to Out</td><td class="zh">渲染入点到出点</td><td>预渲染所选范围。</td></tr>
+            <tr><td class="en">Delete render files</td><td class="zh">删除渲染文件</td><td>清理渲染缓存。</td></tr>
+            <tr><td class="en">Loop playback</td><td class="zh">循环播放</td><td>开关循环。</td></tr>
+            <tr><td class="en">Video effects / Transitions</td><td class="zh">视频效果 / 转场</td><td>打开对应面板。</td></tr>
+            <tr><td class="en">Audio mixer</td><td class="zh">音频混音器</td><td>多轨混音。</td></tr>
+            <tr><td class="en">Recipes / Markers / Review comments / Version history / Project templates</td><td class="zh">配方 / 标记 / 审阅评论 / 版本历史 / 项目模板</td><td>相应功能面板。</td></tr>
+            <tr><td class="en">Manage plugins…</td><td class="zh">管理插件…</td><td>安装 <code>.orplugin</code> 效果插件。</td></tr>
+            <tr><td class="en">Action history</td><td class="zh">操作历史</td><td>查看编辑历史。</td></tr>
+            <tr><td class="en">Project JSON / comments</td><td class="zh">项目 JSON / 评论</td><td>查看项目结构与批注。</td></tr>
+            <tr><td class="en">Maximize timeline</td><td class="zh">最大化时间线</td><td>时间线全屏展开。</td></tr>
+            <tr><td class="en">Keyboard shortcuts</td><td class="zh">键盘快捷键</td><td>打开快捷键面板。</td></tr>
+            <tr><td class="en">Workspaces</td><td class="zh">工作区</td><td>切换界面布局。</td></tr>
+            <tr><td class="en">Save as new workspace… / Reset workspace / Update saved workspace / Delete workspace</td><td class="zh">另存为新工作区 / 重置工作区 / 更新已保存工作区 / 删除工作区</td><td>布局管理。</td></tr>
+            <tr><td class="en">Switch layout / (modified)</td><td class="zh">切换布局 /（已修改）</td><td>工作区子菜单标题与修改标记。</td></tr>
+            <tr><td class="en">Editor tour / Animation &amp; effects tour</td><td class="zh">编辑器导览 / 动画与效果导览</td><td>交互式教程。</td></tr>
+            <tr><td class="en">Documentation / Report an issue / About OpenReel</td><td class="zh">文档 / 报告问题 / 关于 OpenReel</td><td>帮助入口。</td></tr>
+            <tr><td class="en">Welcome &amp; Setup… / Connect an AI Agent… / Reset onboarding</td><td class="zh">欢迎与设置 / 连接 AI Agent / 重置引导</td><td>桌面端专属。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="rail">
+        <h2>5. 左侧功能竖栏 Editor tools</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">AI Editor chat</td><td class="zh">AI 编辑器对话</td><td>打开 AI 对话编辑。</td></tr>
+            <tr><td class="en">Media</td><td class="zh">媒体 / 素材</td><td>素材库。</td></tr>
+            <tr><td class="en">Audio</td><td class="zh">音频</td><td>音频工具。</td></tr>
+            <tr><td class="en">Text &amp; captions</td><td class="zh">文字与字幕</td><td>文字、字幕、转录、QC。</td></tr>
+            <tr><td class="en">Effects</td><td class="zh">效果</td><td>视频/音频效果。</td></tr>
+            <tr><td class="en">Transitions</td><td class="zh">转场</td><td>片段间转场。</td></tr>
+            <tr><td class="en">Graphics</td><td class="zh">图形</td><td>形状、SVG、贴纸等。</td></tr>
+            <tr><td class="en">AI Generate</td><td class="zh">AI 生成</td><td>AI 生成媒体。</td></tr>
+            <tr><td class="en">Recipes</td><td class="zh">配方</td><td>预设工作流。</td></tr>
+            <tr><td class="en">Markers</td><td class="zh">标记</td><td>时间线标记。</td></tr>
+            <tr><td class="en">Comments</td><td class="zh">评论</td><td>审阅评论。</td></tr>
+            <tr><td class="en">Versions</td><td class="zh">版本</td><td>项目版本历史。</td></tr>
+            <tr><td class="en">Project settings</td><td class="zh">项目设置</td><td>当前项目配置。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="timeline">
+        <h2>6. 时间线与轨道 Timeline</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Selection tool (V)</td><td class="zh">选择工具</td><td>选择并移动片段。</td></tr>
+            <tr><td class="en">Blade tool (B)</td><td class="zh">刀片工具</td><td>点击片段切一刀。</td></tr>
+            <tr><td class="en">Ripple trim (R)</td><td class="zh">波纹修剪</td><td>修剪并推动后续片段。</td></tr>
+            <tr><td class="en">Slip (Y)</td><td class="zh">滑移</td><td>片段内容在原地滑动。</td></tr>
+            <tr><td class="en">Rolling edit (Shift+N)</td><td class="zh">卷动编辑</td><td>同时调整相邻片段。</td></tr>
+            <tr><td class="en">Slide (U)</td><td class="zh">滑动</td><td>移动片段并补偿相邻片段。</td></tr>
+            <tr><td class="en">Rate stretch (Shift+R)</td><td class="zh">速率拉伸</td><td>拖动改变时长与速度。</td></tr>
+            <tr><td class="en">Track select forward / backward</td><td class="zh">向前/向后选择轨道</td><td>批量选择轨道片段。</td></tr>
+            <tr><td class="en">Hand tool (H)</td><td class="zh">手形工具</td><td>拖动时间线视图。</td></tr>
+            <tr><td class="en">Zoom tool (Z)</td><td class="zh">缩放工具</td><td>缩放时间线。</td></tr>
+            <tr><td class="en">Snap on/off (N)</td><td class="zh">吸附开关</td><td>自动对齐剪辑点。</td></tr>
+            <tr><td class="en">Audio scrubbing on/off</td><td class="zh">音频擦洗开关</td><td>拖动播放头时是否发声。</td></tr>
+            <tr><td class="en">Linked selection</td><td class="zh">联动选择</td><td>音视频片段一起选中。</td></tr>
+            <tr><td class="en">Add marker (M)</td><td class="zh">添加标记</td><td>在时间线打点。</td></tr>
+            <tr><td class="en">Split (S) / Delete (Del)</td><td class="zh">分割 / 删除</td><td>常用剪辑按钮。</td></tr>
+            <tr><td class="en">Track</td><td class="zh">轨道类型</td><td>Track / Dialogue / Music / Captions。</td></tr>
+            <tr><td class="en">All / Video / Image / Audio / Text / Graphics</td><td class="zh">全部/视频/图片/音频/文字/图形</td><td>轨道或素材过滤。</td></tr>
+            <tr><td class="en">More timeline tools</td><td class="zh">更多时间线工具</td><td>更多工具弹层。</td></tr>
+            <tr><td class="en">Trim start to playhead (Q) / Trim end to playhead (W)</td><td class="zh">修剪起点/终点到播放头</td><td>快捷键 Q/W。</td></tr>
+            <tr><td class="en">Duplicate (⌘D) / Ripple delete (⇧Del)</td><td class="zh">复制副本 / 波纹删除</td><td>更多工具中的按钮。</td></tr>
+            <tr><td class="en">Add track / Manage track layers</td><td class="zh">添加轨道 / 管理轨道层</td><td>轨道管理。</td></tr>
+            <tr><td class="en">Lock track / Hide track / Mute track / Solo track</td><td class="zh">锁定轨道 / 隐藏轨道 / 静音 / 独奏</td><td>轨道头控制。</td></tr>
+            <tr><td class="en">Sync lock</td><td class="zh">同步锁定</td><td>波纹编辑时保持轨道同步。</td></tr>
+            <tr><td class="en">Track target / Untarget</td><td class="zh">设为目标轨道 / 取消目标</td><td>指定片段粘贴或提取落点。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="assets">
+        <h2>7. 素材面板 AssetsPanel</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Project / Stock / Recordings</td><td class="zh">项目 / 素材库 / 录制</td><td>素材来源页签。</td></tr>
+            <tr><td class="en">Search media</td><td class="zh">搜索媒体</td><td>素材搜索框。</td></tr>
+            <tr><td class="en">Import / Import Media</td><td class="zh">导入媒体</td><td>从本地导入文件。</td></tr>
+            <tr><td class="en">Record</td><td class="zh">录制</td><td>录制屏幕或相机。</td></tr>
+            <tr><td class="en">All / Video / Audio / Images</td><td class="zh">全部 / 视频 / 音频 / 图片</td><td>素材类型筛选。</td></tr>
+            <tr><td class="en">Replace asset</td><td class="zh">替换素材</td><td>替换媒体源文件。</td></tr>
+            <tr><td class="en">Add to timeline</td><td class="zh">添加到时间线</td><td>把素材放到时间线。</td></tr>
+            <tr><td class="en">Create with KieAI</td><td class="zh">用 KieAI 创建</td><td>调用 AI 生成。</td></tr>
+            <tr><td class="en">Copy credits / Delete</td><td class="zh">复制署名 / 删除</td><td>素材项操作。</td></tr>
+            <tr><td class="en">Media offline</td><td class="zh">媒体离线</td><td>源文件丢失。</td></tr>
+            <tr><td class="en">Used in timeline</td><td class="zh">已用于时间线</td><td>素材使用状态。</td></tr>
+            <tr><td class="en">Subclip</td><td class="zh">子片段</td><td>从原片截取的片段。</td></tr>
+            <tr><td class="en">OTHER WAYS TO START</td><td class="zh">其他开始方式</td><td>空态引导标题。</td></tr>
+            <tr><td class="en">Browse stock footage</td><td class="zh">浏览素材库</td><td>免费视频、音乐与音效。</td></tr>
+            <tr><td class="en">Start from a recipe</td><td class="zh">从配方开始</td><td>预设工作流模板。</td></tr>
+            <tr><td class="en">No media yet</td><td class="zh">暂无媒体</td><td>素材为空。</td></tr>
+            <tr><td class="en">Show Only Missing Assets / Missing / Relink from Folder</td><td class="zh">仅显示缺失素材 / 缺失 / 从文件夹重新链接</td><td>离线媒体修复。</td></tr>
+            <tr><td class="en">Music / Sound FX / Voiceover</td><td class="zh">音乐 / 音效 / 旁白</td><td>音频素材分类。</td></tr>
+            <tr><td class="en">Sort: Recent / A–Z / Z–A</td><td class="zh">排序：最近 / A–Z / Z–A</td><td>素材排序。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="text">
+        <h2>8. 文字与字幕 Text &amp; captions</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Text</td><td class="zh">文字</td><td>文字样式与标题模板。</td></tr>
+            <tr><td class="en">Captions</td><td class="zh">字幕</td><td>字幕编辑。</td></tr>
+            <tr><td class="en">Transcript</td><td class="zh">转录</td><td>语音转文字文本。</td></tr>
+            <tr><td class="en">QC</td><td class="zh">质检</td><td>字幕阅读速度、行数、时长、间隔检查。</td></tr>
+            <tr><td class="en">Saved styles</td><td class="zh">已保存样式</td><td>本地保存的文字样式。</td></tr>
+            <tr><td class="en">Add plain text</td><td class="zh">添加普通文字</td><td>新增文字片段。</td></tr>
+            <tr><td class="en">TITLES</td><td class="zh">标题</td><td>标题模板组。</td></tr>
+            <tr><td class="en">LOWER THIRDS</td><td class="zh">下三分之一字幕条</td><td>人名字幕条模板组。</td></tr>
+            <tr><td class="en">Show less / See all</td><td class="zh">收起 / 查看全部</td><td>展开或折叠模板。</td></tr>
+            <tr><td class="en">Auto captions</td><td class="zh">自动字幕</td><td>语音识别生成字幕。</td></tr>
+            <tr><td class="en">Caption language</td><td class="zh">字幕/转写语言</td><td>媒体语言，不是界面语言。</td></tr>
+            <tr><td class="en">Generate captions</td><td class="zh">生成字幕</td><td>开始生成。</td></tr>
+            <tr><td class="en">Save selected text style</td><td class="zh">保存所选文字样式</td><td>保存样式供复用。</td></tr>
+            <tr><td class="en">STARTER STYLES</td><td class="zh">入门样式</td><td>内置样式组。</td></tr>
+            <tr><td class="en">Load more styles</td><td class="zh">加载更多样式</td><td>展开样式列表。</td></tr>
+            <tr><td class="en">Delete saved style</td><td class="zh">删除已保存样式</td><td>移除本地样式。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="effects">
+        <h2>9. 特效与转场 Effects / Transitions</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Effects · Drag onto a clip</td><td class="zh">效果 · 拖到片段上</td><td>效果应用提示。</td></tr>
+            <tr><td class="en">Transitions · Drop on a cut</td><td class="zh">转场 · 放到剪切点上</td><td>转场应用提示。</td></tr>
+            <tr><td class="en">Search effects / Search transitions</td><td class="zh">搜索效果 / 搜索转场</td><td>按名称筛选。</td></tr>
+            <tr><td class="en">All / Stylize / Keying / Audio</td><td class="zh">全部 / 风格化 / 抠像 / 音频</td><td>效果分类。</td></tr>
+            <tr><td class="en">All / Dissolve / Wipe / Slide / Zoom / Glitch</td><td class="zh">全部 / 叠化 / 擦除 / 滑动 / 缩放 / 故障</td><td>转场分类。</td></tr>
+            <tr><td class="en">Pixelate / Mirror / Lens distort / Stabilize / Brightness / Contrast</td><td class="zh">像素化 / 镜像 / 镜头畸变 / 防抖 / 亮度 / 对比度</td><td>效果名称示例。</td></tr>
+            <tr><td class="en">LUT · Warm</td><td class="zh">LUT · 暖色</td><td>预设调色效果。</td></tr>
+            <tr><td class="en">No effects match “…” / No transitions match “…”</td><td class="zh">没有匹配的效果/转场</td><td>搜索空态。</td></tr>
+            <tr><td class="en">Apply to the cut / Apply to all N cuts</td><td class="zh">应用到该剪切点 / 应用到全部 N 个剪切点</td><td>批量应用转场。</td></tr>
+            <tr><td class="en">Default duration</td><td class="zh">默认时长</td><td>转场默认持续时间。</td></tr>
+            <tr><td class="en">Effect applied / Transition applied / No compatible cuts</td><td class="zh">已应用效果 / 已应用转场 / 没有兼容剪切点</td><td>操作结果提示。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="inspector">
+        <h2>10. 右侧检查器标签 Inspector</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>适用对象</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Video / Audio / Speed / Color / AI</td><td class="zh">视频 / 音频 / 速度 / 调色 / AI</td><td>视频片段。</td></tr>
+            <tr><td class="en">Image / Speed / Color / AI</td><td class="zh">图片 / 速度 / 调色 / AI</td><td>图片片段。</td></tr>
+            <tr><td class="en">Audio / Speed / AI</td><td class="zh">音频 / 速度 / AI</td><td>音频片段。</td></tr>
+            <tr><td class="en">Text / Animation / Transform</td><td class="zh">文字 / 动画 / 变换</td><td>文字片段。</td></tr>
+            <tr><td class="en">Shape / SVG / Sticker</td><td class="zh">形状 / SVG / 贴纸</td><td>图形类片段，另有 Animation / Transform / Effects。</td></tr>
+            <tr><td class="en">Changes</td><td class="zh">更改</td><td>AI 对话打开时替代检查器，显示 AI 修改步骤。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="export">
+        <h2>11. 导出对话框 Export</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Export Video</td><td class="zh">导出视频</td><td>对话框标题与主按钮。</td></tr>
+            <tr><td class="en">Choose a ready-made preset or fine-tune every setting.</td><td class="zh">选择现成预设，或精细调整每一项设置。</td><td>对话框副标题。</td></tr>
+            <tr><td class="en">Sequence to export</td><td class="zh">要导出的序列</td><td>选择导出序列。</td></tr>
+            <tr><td class="en">Entire timeline / Marked In/Out</td><td class="zh">整条时间线 / 标记的入出点</td><td>导出范围。</td></tr>
+            <tr><td class="en">Mark In and Out on the timeline to export a section.</td><td class="zh">在时间线上设置入点和出点以导出片段。</td><td>范围提示。</td></tr>
+            <tr><td class="en">Presets / Smaller File / Custom Settings / Images &amp; GIF</td><td class="zh">预设 / 更小文件 / 自定义设置 / 图片与 GIF</td><td>四个导出页签。</td></tr>
+            <tr><td class="en">Match source</td><td class="zh">匹配源</td><td>沿用源素材参数。</td></tr>
+            <tr><td class="en">Recommended / Quick Export / Export platform / Export preset</td><td class="zh">推荐 / 快速导出 / 导出平台 / 导出预设</td><td>预设区字段。</td></tr>
+            <tr><td class="en">MP4 / WebM / MOV / MXF</td><td class="zh">MP4 / WebM / MOV / MXF</td><td>容器格式；MXF 仅桌面。</td></tr>
+            <tr><td class="en">H.264 / H.265 (HEVC) / VP9 / AV1</td><td class="zh">H.264 / H.265（HEVC）/ VP9 / AV1</td><td>常见浏览器编码。</td></tr>
+            <tr><td class="en">ProRes / DNxHR / XDCAM HD422 / AVC-Intra</td><td class="zh">ProRes / DNxHR / XDCAM HD422 / AVC-Intra</td><td>专业编码，多需桌面编码器。</td></tr>
+            <tr><td class="en">Video / Quality &amp; encoding / Resolution / Frame rate</td><td class="zh">视频 / 质量与编码 / 分辨率 / 帧率</td><td>自定义设置分组。</td></tr>
+            <tr><td class="en">4K / 2K / 1080p / 720p / 480p / Vertical 1080p / Square 1080 / Original / Current</td><td class="zh">4K / 2K / 1080p / 720p / 480p / 竖屏 1080p / 方形 1080 / 原始 / 当前</td><td>分辨率预设。</td></tr>
+            <tr><td class="en">AAC / MP3 / WAV</td><td class="zh">AAC / MP3 / WAV</td><td>音频编码。</td></tr>
+            <tr><td class="en">Add to queue</td><td class="zh">加入队列</td><td>稍后统一导出。</td></tr>
+            <tr><td class="en">Export Video / Compress &amp; Export</td><td class="zh">导出视频 / 压缩并导出</td><td>立即执行。</td></tr>
+            <tr><td class="en">Cancel</td><td class="zh">取消</td><td>关闭对话框。</td></tr>
+            <tr><td class="en">Download to this device / Choose a file location</td><td class="zh">下载到本设备 / 选择文件位置</td><td>保存位置。</td></tr>
+            <tr><td class="en">Hardware accelerated</td><td class="zh">硬件加速</td><td>编码器状态。</td></tr>
+            <tr><td class="en">Export queue</td><td class="zh">导出队列</td><td>队列面板标题。</td></tr>
+            <tr><td class="en">Start / Pause / Export stems</td><td class="zh">开始 / 暂停 / 导出分轨</td><td>队列操作。</td></tr>
+            <tr><td class="en">ProRes, DNxHR, XDCAM HD422, AVC-Intra, MXF … require the desktop encoder.</td><td class="zh">这些格式需要桌面编码器</td><td>浏览器端能力护栏提示。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="ai">
+        <h2>12. AI 对话面板 Assistant</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Assistant</td><td class="zh">助手</td><td>对话面板标题。</td></tr>
+            <tr><td class="en">Edit by chatting</td><td class="zh">通过对话剪辑</td><td>空态标题。</td></tr>
+            <tr><td class="en">Connect a model / No model connected</td><td class="zh">连接模型 / 未连接模型</td><td>AI 模型连接状态。</td></tr>
+            <tr><td class="en">New chat</td><td class="zh">新建对话</td><td>清空当前对话。</td></tr>
+            <tr><td class="en">AI connection settings</td><td class="zh">AI 连接设置</td><td>打开模型配置。</td></tr>
+            <tr><td class="en">Conversation history</td><td class="zh">对话历史</td><td>历史会话。</td></tr>
+            <tr><td class="en">Undo last AI turn</td><td class="zh">撤销上一轮 AI 操作</td><td>回退 AI 本轮修改。</td></tr>
+            <tr><td class="en">More edit ideas</td><td class="zh">更多剪辑思路</td><td>示例提示入口。</td></tr>
+            <tr><td class="en">Assistant actions</td><td class="zh">助手操作</td><td>面板操作菜单。</td></tr>
+            <tr><td class="en">Describe an edit… e.g. “make a 9:16 version with captions”</td><td class="zh">描述一个剪辑需求…例如“做带字幕的 9:16 版本”</td><td>输入框占位文案。</td></tr>
+            <tr><td class="en">Add captions / Make a 9:16 version / Balance audio</td><td class="zh">添加字幕 / 制作 9:16 版本 / 平衡音频</td><td>示例提示词。</td></tr>
+            <tr><td class="en">@Timeline 1 / Project context</td><td class="zh">@时间线 1 / 项目上下文</td><td>输入中的上下文引用。</td></tr>
+            <tr><td class="en">Enter to send · Shift+Enter for a new line</td><td class="zh">Enter 发送 · Shift+Enter 换行</td><td>输入提示。</td></tr>
+            <tr><td class="en">Send / Stop</td><td class="zh">发送 / 停止</td><td>提交或中止生成。</td></tr>
+            <tr><td class="en">Connect a model to send</td><td class="zh">连接模型后才能发送</td><td>未连接时禁用提示。</td></tr>
+            <tr><td class="en">Confirm action</td><td class="zh">确认操作</td><td>工具调用确认卡标题。</td></tr>
+            <tr><td class="en">Approve / Approve all this turn / Reject</td><td class="zh">批准 / 批准本轮全部 / 拒绝</td><td>工具调用确认按钮。</td></tr>
+            <tr><td class="en">Changes {n}</td><td class="zh">更改（n 项）</td><td>更改面板标题。</td></tr>
+            <tr><td class="en">Go to this edit</td><td class="zh">跳转到该编辑点</td><td>定位修改位置。</td></tr>
+            <tr><td class="en">Undo all / Keep all / Kept</td><td class="zh">全部撤销 / 全部保留 / 已保留</td><td>批量处理 AI 修改。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="save">
+        <h2>13. 保存、恢复与项目切换</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Saved / Saving… / Unsaved / Save failed</td><td class="zh">已保存 / 保存中… / 未保存 / 保存失败</td><td>顶部保存状态。</td></tr>
+            <tr><td class="en">Projects are saved locally on this device</td><td class="zh">项目保存在本设备本地</td><td>保存状态悬停提示。</td></tr>
+            <tr><td class="en">Auto-save is off</td><td class="zh">自动保存已关闭</td><td>状态提示。</td></tr>
+            <tr><td class="en">Recover Your Work</td><td class="zh">恢复你的工作</td><td>恢复对话框标题。</td></tr>
+            <tr><td class="en">We found an unsaved project</td><td class="zh">发现未保存的项目</td><td>恢复提示。</td></tr>
+            <tr><td class="en">Last saved …</td><td class="zh">上次保存时间…</td><td>保存槽位信息。</td></tr>
+            <tr><td class="en">Clear all saved projects</td><td class="zh">清除所有保存的项目</td><td>清理自动保存。</td></tr>
+            <tr><td class="en">Start Fresh / Recover Project / Recovering…</td><td class="zh">重新开始 / 恢复项目 / 恢复中…</td><td>恢复操作按钮。</td></tr>
+            <tr><td class="en">Current Project</td><td class="zh">当前项目</td><td>项目切换器标题。</td></tr>
+            <tr><td class="en">Rename project / Save project name</td><td class="zh">重命名项目 / 保存项目名</td><td>项目命名。</td></tr>
+            <tr><td class="en">Project backups</td><td class="zh">项目备份</td><td>打开备份列表。</td></tr>
+            <tr><td class="en">New Project / Start fresh with a new canvas</td><td class="zh">新建项目 / 用新画布重新开始</td><td>新建入口。</td></tr>
+            <tr><td class="en">Opening project backups… / Dismiss</td><td class="zh">正在打开项目备份… / 关闭</td><td>备份状态与关闭。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="shortcuts">
+        <h2>14. 快捷键面板 Keyboard Shortcuts</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Keyboard Shortcuts</td><td class="zh">键盘快捷键</td><td>面板标题。</td></tr>
+            <tr><td class="en">Find shortcuts, choose a preset, or customize your keys.</td><td class="zh">查找快捷键、选择预设或自定义按键。</td><td>面板说明。</td></tr>
+            <tr><td class="en">Search shortcuts…</td><td class="zh">搜索快捷键…</td><td>搜索框。</td></tr>
+            <tr><td class="en">Keyboard shortcut preset(s) / Preset</td><td class="zh">快捷键预设 / 预设</td><td>预设选择器。</td></tr>
+            <tr><td class="en">Reset All</td><td class="zh">全部重置</td><td>恢复默认键位。</td></tr>
+            <tr><td class="en">All / Playback / Editing / Selection / Timeline / View / File / Tools</td><td class="zh">全部 / 播放 / 编辑 / 选择 / 时间线 / 视图 / 文件 / 工具</td><td>快捷键分类。</td></tr>
+            <tr><td class="en">OpenReel Default / CapCut / Adobe Premiere / Final Cut Pro / DaVinci Resolve</td><td class="zh">OpenReel 默认 / CapCut / Premiere / Final Cut Pro / DaVinci Resolve</td><td>键位预设。</td></tr>
+            <tr><td class="en">Set shortcut for … / Press keys…</td><td class="zh">设置…的快捷键 / 请按键…</td><td>改键状态。</td></tr>
+            <tr><td class="en">Customize … shortcut / Reset to default</td><td class="zh">自定义…快捷键 / 恢复默认</td><td>行内按钮。</td></tr>
+            <tr><td class="en">No shortcuts found</td><td class="zh">未找到快捷键</td><td>搜索空态。</td></tr>
+            <tr><td class="en">Click a shortcut key to customize • Press Esc to close</td><td class="zh">点击快捷键可自定义 · 按 Esc 关闭</td><td>底部提示。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="settings">
+        <h2>15. 项目设置 GeneralPanel</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">16:9 Landscape (1080p) / 9:16 Vertical (TikTok/Reels) / 1:1 Square / 4:5 Portrait / 4:3 Standard / 21:9 Cinematic / 4K Landscape</td><td class="zh">16:9 横屏 / 9:16 竖屏 / 1:1 方形 / 4:5 纵向 / 4:3 标准 / 21:9 宽银幕 / 4K 横屏</td><td>画幅预设。</td></tr>
+            <tr><td class="en">Project Composition</td><td class="zh">项目画幅</td><td>设置分组。</td></tr>
+            <tr><td class="en">Width / Height / Apply</td><td class="zh">宽度 / 高度 / 应用</td><td>自定义尺寸。</td></tr>
+            <tr><td class="en">Editing frame rate</td><td class="zh">编辑帧率</td><td>项目 fps。</td></tr>
+            <tr><td class="en">Background fill / None / Blur / Background color</td><td class="zh">背景填充 / 无 / 模糊 / 背景色</td><td>画幅外区域填充。</td></tr>
+            <tr><td class="en">Auto-Save / Enable auto-save / Save every / N minute(s)</td><td class="zh">自动保存 / 启用自动保存 / 每 N 分钟保存</td><td>自动保存设置。</td></tr>
+            <tr><td class="en">AI Connections</td><td class="zh">AI 连接</td><td>AI 服务配置。</td></tr>
+            <tr><td class="en">Text to Speech / Voice To Speech / Sound Effects</td><td class="zh">文字转语音 / 语音转语音 / 音效</td><td>AI 能力分类。</td></tr>
+            <tr><td class="en">Creative tools API format / Choose API format…</td><td class="zh">创作工具 API 格式 / 选择 API 格式…</td><td>API 协议选择。</td></tr>
+            <tr><td class="en">Base URL / Model ID / OpenAI-compatible endpoint / Anthropic-compatible endpoint</td><td class="zh">基础地址 / 模型 ID / OpenAI 兼容端点 / Anthropic 兼容端点</td><td>自定义模型配置。</td></tr>
+            <tr><td class="en">AI Aggregator</td><td class="zh">AI 聚合服务</td><td>聚合服务选择。</td></tr>
+          </tbody>
+        </table>
+        <div class="callout">
+          <p>设置面板里目前没有 <strong>Language</strong> 选项。代码中的 <code>language: "en"</code> 不是界面语言开关，详见 <a href="./工程源码分析.html#i18n">源码分析文档</a>。</p>
+        </div>
+      </section>
+
+      <section id="status">
+        <h2>16. 常见状态与提示</h2>
+        <table>
+          <thead><tr><th>英文原文</th><th>中文译法</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="en">Loading… / Loading templates… / Loading recent projects… / Loading drafts…</td><td class="zh">加载中…</td><td>通用加载状态。</td></tr>
+            <tr><td class="en">Saving current work and creating project…</td><td class="zh">正在保存当前工作并创建项目…</td><td>创建项目中的提示。</td></tr>
+            <tr><td class="en">No media yet / No Recent Projects / No templates found / No shortcuts found</td><td class="zh">暂无媒体 / 无最近项目 / 未找到模板 / 未找到快捷键</td><td>空态。</td></tr>
+            <tr><td class="en">No model connected / Connect a model to send</td><td class="zh">未连接模型 / 连接模型后才能发送</td><td>AI 未配置。</td></tr>
+            <tr><td class="en">Could not create project. Try again.</td><td class="zh">无法创建项目，请重试。</td><td>创建失败。</td></tr>
+            <tr><td class="en">Import failed / Recording failed / Export failed</td><td class="zh">导入失败 / 录制失败 / 导出失败</td><td>操作失败提示。</td></tr>
+            <tr><td class="en">Try again. / Retry</td><td class="zh">重试</td><td>通用重试按钮。</td></tr>
+            <tr><td class="en">Your current project is still open. Please try again.</td><td class="zh">当前项目仍处于打开状态，请重试。</td><td>打开项目冲突提示。</td></tr>
+            <tr><td class="en">Custom / Compressed</td><td class="zh">自定义 / 已压缩</td><td>导出预设标签。</td></tr>
+            <tr><td class="en">Checking this browser’s encoder support…</td><td class="zh">正在检查浏览器编码器支持…</td><td>导出前检测。</td></tr>
+            <tr><td class="en">Try adjusting your search or filter</td><td class="zh">试试调整搜索或筛选条件</td><td>空态建议。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <p class="small" style="margin-top:36px">相关文档：<a href="./编辑使用攻略.html">编辑使用攻略</a> ｜ <a href="./部署与操作指南.html">部署与操作指南</a> ｜ <a href="./工程源码分析.html">工程源码分析</a></p>
+    </article>
+  </div>
+
+  <footer>
+    本文档由工程静态分析生成，英文原文以当前仓库代码为准。翻译仅供理解参考，不代表官方本地化。
+  </footer>
+</body>
+</html>
