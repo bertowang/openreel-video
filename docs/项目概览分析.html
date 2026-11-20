@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenReel Video 项目概览分析</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #fff;
+      --ink: #202431;
+      --muted: #616a7a;
+      --line: #e4e7ef;
+      --brand: #0f766e;
+      --brand2: #4338ca;
+      --brand-soft: #ecfeff;
+      --brand2-soft: #eef2ff;
+      --code-bg: #111827;
+      --code-ink: #e5e7eb;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(32, 36, 49, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.75;
+      font-size: 15px;
+    }
+    a { color: var(--brand2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header {
+      background: linear-gradient(135deg, #134e4a, #0f766e 50%, #4338ca);
+      color: #fff;
+      padding: 34px 24px 28px;
+    }
+    .wrap { max-width: 1180px; margin: 0 auto; }
+    header h1 { margin: 0 0 8px; font-size: 30px; }
+    header p { margin: 0; max-width: 920px; opacity: .95; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .badge { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); }
+    .links { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 16px; }
+    .links a { color: #fff; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; }
+    .layout { max-width: 1180px; margin: 24px auto 60px; padding: 0 20px; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 24px; align-items: start; }
+    aside { position: sticky; top: 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 16px; box-shadow: var(--shadow); max-height: calc(100vh - 40px); overflow: auto; }
+    aside strong { display: block; color: var(--muted); font-size: 12px; letter-spacing: .1em; margin-bottom: 10px; }
+    aside ol { padding-left: 20px; margin: 0; }
+    aside li { margin: 5px 0; }
+    aside a { color: var(--ink); font-size: 13px; }
+    article { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px 36px 46px; box-shadow: var(--shadow); min-width: 0; }
+    h2 { margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--brand-soft); font-size: 22px; scroll-margin-top: 20px; }
+    h2:first-of-type { margin-top: 6px; }
+    h3 { margin: 24px 0 10px; font-size: 17px; color: #0f5f59; }
+    p { margin: 10px 0; }
+    ul, ol { padding-left: 22px; }
+    li { margin: 5px 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f1f3f7; border: 1px solid #e5e8f0; border-radius: 5px; padding: 1px 5px; font-size: .9em; }
+    pre { background: var(--code-bg); color: var(--code-ink); border-radius: 10px; padding: 16px 18px; overflow: auto; line-height: 1.55; font-size: 13px; }
+    pre code { background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid var(--line); padding: 9px 11px; text-align: left; vertical-align: top; min-width: 150px; }
+    th { background: #f8f9fc; }
+    tr:nth-child(even) td { background: #fcfcfe; }
+    .callout { border-left: 4px solid var(--brand2); background: var(--brand2-soft); padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 16px 0; }
+    .callout.teal { border-left-color: var(--brand); background: var(--brand-soft); }
+    .small { font-size: 13px; color: var(--muted); }
+    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; }
+    @media (max-width: 880px) { .layout { grid-template-columns: 1fr; } aside { position: static; max-height: none; } article { padding: 22px 18px 34px; } header h1 { font-size: 24px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>OpenReel Video 项目概览分析</h1>
+      <p>由 <code>project-summary</code> skill 对当前仓库的 manifest、README、目录结构、测试与 CI 配置进行分析后生成。结论均来自可验证的仓库文件。</p>
+      <div class="badges">
+        <span class="badge">TypeScript</span>
+        <span class="badge">React 19 + Vite</span>
+        <span class="badge">pnpm workspace</span>
+        <span class="badge">WebCodecs / WebGPU</span>
+        <span class="badge">2026-11-20</span>
+      </div>
+      <nav class="links">
+        <a href="./工程源码分析.html">工程源码分析</a>
+        <a href="./部署与操作指南.html">部署与操作指南</a>
+        <a href="./编辑使用攻略.html">编辑使用攻略</a>
+        <a href="./界面英文菜单对照.html">界面英文菜单对照</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <strong>目录</strong>
+      <ol>
+        <li><a href="#summary">一页结论</a></li>
+        <li><a href="#runtime-arch">运行时架构图</a></li>
+        <li><a href="#quick-start">快速开始</a></li>
+        <li><a href="#structure">工程结构</a></li>
+        <li><a href="#key-files">关键文件</a></li>
+        <li><a href="#entry-points">入口文件</a></li>
+        <li><a href="#dependencies">依赖</a></li>
+        <li><a href="#testing">测试</a></li>
+        <li><a href="#cicd">CI/CD</a></li>
+        <li><a href="#notes">补充观察</a></li>
+      </ol>
+      <p class="small" style="margin-top:14px"><a href="#top">回到顶部</a></p>
+    </aside>
+
+    <article id="top">
+      <section id="summary">
+        <h2>1. 一页结论</h2>
+        <div class="callout teal">
+          <p><strong>Description：</strong>Professional video, audio, and photo editing in your browser（<code>package.json:5</code>）</p>
+          <p><strong>Language：</strong>TypeScript 为主（2288 个 <code>.ts</code> + 665 个 <code>.tsx</code>，不含 <code>icons/</code> 下 6430 个 SVG）</p>
+          <p><strong>Framework / Runtime：</strong>React 19 + Vite 5 + Zustand 4；浏览器运行时，桌面端 Electron 33，云端 Cloudflare Workers/Pages</p>
+          <p><strong>Architecture：</strong>本地优先的浏览器编辑器 monorepo：UI → Store → Bridge → <code>@openreel/core</code> 引擎；旁挂 Agent / Collab / Export / Desktop</p>
+          <p><strong>Package Manager：</strong>pnpm 11.7.0；<strong>License：</strong>MIT；<strong>Node：</strong><code>&gt;=18</code>，CI 使用 Node 22</p>
+        </div>
+        <p class="small">数据来源：根 <code>package.json</code>、<code>pnpm-workspace.yaml</code>、<code>README.md</code>、<code>LICENSE</code>、各 app/package manifest 与 CI workflow。</p>
+      </section>
+
+      <section id="runtime-arch">
+        <h2>2. 运行时架构图</h2>
+        <p>下图由 Archify 基于当前仓库的真实源码证据生成，只保留 10 个核心组件和一条主路径：<strong>用户 / 本地素材 → React 编辑器 → Zustand 工程状态 → ActionExecutor → RenderBridge → VideoEngine → 浏览器 API</strong>。</p>
+        <div class="callout teal">
+          <p><strong>主路径：</strong>用户编辑意图先落到工程描述，再由 ActionExecutor 校验执行；RenderBridge 读取更新后的 project，交给 VideoEngine 逐帧合成，最终通过 Canvas / Web Audio / WebCodecs 呈现或导出。</p>
+          <p class="small"><strong>旁路：</strong>AudioEngine 并行调度声音；ExportEngine 按固定时间步导出；AutoSave 异步写入 IndexedDB。</p>
+        </div>
+        <iframe src="./运行时架构图.html" title="OpenReel Video 运行时架构图" style="width:100%;height:720px;border:1px solid var(--line);border-radius:12px;background:#fff" loading="lazy"></iframe>
+        <p class="small">若 iframe 未加载，<a href="./运行时架构图.html" target="_blank" rel="noopener">在新窗口打开架构图</a>。生成参数与源码证据见 <code>.archify/architecture-openreel-runtime-20261120-render/architecture.json</code>。</p>
+      </section>
+
+      <section id="quick-start">
+        <h2>3. 快速开始</h2>
+        <pre><code>pnpm install
+pnpm dev        # http://localhost:5173
+pnpm build
+pnpm preview</code></pre>
+        <p class="small">来源：<code>README.md:100-121</code>、<code>package.json:7-16</code></p>
+      </section>
+
+      <section id="structure">
+        <h2>4. 工程结构</h2>
+        <table>
+          <thead><tr><th>目录</th><th>角色</th></tr></thead>
+          <tbody>
+            <tr><td><code>apps/web</code></td><td>主 Web 编辑器：React UI、stores、services、bridges、E2E。</td></tr>
+            <tr><td><code>apps/desktop</code></td><td>Electron 壳、原生导出 IPC、ffmpeg sidecar、桌面测试。</td></tr>
+            <tr><td><code>apps/cloud</code></td><td>Cloudflare Worker / Pages 云端能力。</td></tr>
+            <tr><td><code>apps/image</code>, <code>apps/studio</code></td><td>图像与创作相关应用。</td></tr>
+            <tr><td><code>packages/core</code></td><td>领域核心：timeline、actions、video、audio、export、captions、WASM。</td></tr>
+            <tr><td><code>packages/agent</code></td><td>AI 工具注册、协议、执行器。</td></tr>
+            <tr><td><code>packages/collab</code></td><td>协作协议、冲突检测、op replay。</td></tr>
+            <tr><td><code>packages/ui</code></td><td>通用 UI 组件库。</td></tr>
+            <tr><td><code>packages/fxpkg</code>, <code>creation-*</code>, <code>image-core</code>, <code>agent-runner</code></td><td>插件包、创作系统、图像核心、Agent runner。</td></tr>
+            <tr><td><code>docs</code></td><td>中文操作/源码文档与开发文档。</td></tr>
+          </tbody>
+        </table>
+        <p>README 也明确了 <code>apps/web</code>（components / stores / services / bridges）与 <code>packages/core</code>（video / audio 等引擎）的分层，见 <code>README.md:143-160</code>。</p>
+      </section>
+
+      <section id="key-files">
+        <h2>5. 关键文件</h2>
+        <table>
+          <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>package.json</code></td><td>根脚本、workspace、依赖、Node/pnpm 版本。</td></tr>
+            <tr><td><code>pnpm-workspace.yaml</code></td><td><code>apps/*</code> + <code>packages/*</code>，ffmpeg 补丁与构建白名单。</td></tr>
+            <tr><td><code>tsconfig.base.json</code></td><td>严格 TS 配置与 workspace 路径别名。</td></tr>
+            <tr><td><code>apps/web/index.html</code></td><td>静态入口，<code>#root</code> 与 <code>/src/main.tsx</code>。</td></tr>
+            <tr><td><code>apps/web/src/main.tsx</code></td><td>React 挂载、Service Worker、桌面原生后端注入。</td></tr>
+            <tr><td><code>apps/web/src/App.tsx</code></td><td>路由、欢迎页、懒加载 <code>EditorInterface</code>。</td></tr>
+            <tr><td><code>apps/web/src/hooks/use-router.ts</code></td><td>hash 路由。</td></tr>
+            <tr><td><code>apps/web/src/stores/project-store.ts</code></td><td>工程状态中心。</td></tr>
+            <tr><td><code>apps/web/src/components/editor/EditorInterface.tsx</code></td><td>编辑器 UI 总装。</td></tr>
+            <tr><td><code>apps/web/src/bridges/render-bridge.ts</code></td><td>store 状态到渲染引擎的同步。</td></tr>
+            <tr><td><code>packages/core/src/index.ts</code></td><td>core 引擎总入口。</td></tr>
+            <tr><td><code>packages/core/src/types/timeline.ts</code></td><td>Timeline / Track / Clip / Transition 数据结构。</td></tr>
+            <tr><td><code>packages/core/src/actions/action-executor.ts</code></td><td>Action 校验、执行、历史记录。</td></tr>
+            <tr><td><code>packages/core/src/video/video-engine.ts</code></td><td>视频帧渲染与转场求值。</td></tr>
+            <tr><td><code>packages/core/src/audio/audio-engine.ts</code></td><td>Web Audio 路由与混音。</td></tr>
+            <tr><td><code>packages/core/src/export/export-engine.ts</code></td><td>导出主流程。</td></tr>
+            <tr><td><code>packages/agent/src/registry.ts</code></td><td>AI 工具注册与执行定义。</td></tr>
+            <tr><td><code>packages/collab/src/client-engine.ts</code></td><td>协作 op 排序与 replay。</td></tr>
+            <tr><td><code>apps/desktop/src/main/ipc/export.ts</code></td><td>桌面原生导出 IPC。</td></tr>
+            <tr><td><code>apps/web/src/services/auto-save.ts</code></td><td>IndexedDB 自动保存。</td></tr>
+            <tr><td><code>apps/web/src/services/export-runner.ts</code></td><td>导出任务编排。</td></tr>
+          </tbody>
+        </table>
+        <p class="small">以上路径均已做存在性校验。</p>
+      </section>
+
+      <section id="entry-points">
+        <h2>6. 入口文件</h2>
+        <table>
+          <thead><tr><th>目标</th><th>入口</th></tr></thead>
+          <tbody>
+            <tr><td>Web 静态页</td><td><code>apps/web/index.html:17-18</code> 加载 <code>/src/main.tsx</code></td></tr>
+            <tr><td>Web 应用</td><td><code>apps/web/src/main.tsx</code> 创建 React root，注册 SW，注入桌面原生能力</td></tr>
+            <tr><td>页面分发</td><td><code>apps/web/src/App.tsx</code> 通过 <code>useRouter</code> 与 lazy <code>EditorInterface</code> 分发</td></tr>
+            <tr><td>编辑器 UI</td><td><code>apps/web/src/components/editor/EditorInterface.tsx</code></td></tr>
+            <tr><td>Core 引擎</td><td><code>packages/core/src/index.ts</code></td></tr>
+            <tr><td>Desktop 主进程</td><td><code>apps/desktop/package.json:6</code>：main 为 <code>dist/main/index.js</code></td></tr>
+            <tr><td>Desktop MCP shim</td><td><code>apps/desktop/package.json:7-9</code>：<code>openreel-mcp</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="dependencies">
+        <h2>7. 依赖</h2>
+        <p>主要 manifest（<code>package.json</code>、<code>apps/web</code>、<code>apps/desktop</code>、<code>packages/core</code>）合计约 <strong>62 个唯一直接依赖</strong>（32 runtime + 30 dev，按名称去重）。</p>
+        <table>
+          <thead><tr><th>Package</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>react</code>, <code>react-dom</code></td><td>UI 骨架，React 19。</td></tr>
+            <tr><td><code>zustand</code></td><td>状态管理。</td></tr>
+            <tr><td><code>vite</code></td><td>dev server 与生产构建。</td></tr>
+            <tr><td><code>typescript</code></td><td>类型系统。</td></tr>
+            <tr><td><code>tailwindcss</code></td><td>样式。</td></tr>
+            <tr><td><code>vitest</code></td><td>单元测试。</td></tr>
+            <tr><td><code>@playwright/test</code></td><td>E2E。</td></tr>
+            <tr><td><code>mediabunny</code></td><td>demux/mux 与样本搬运。</td></tr>
+            <tr><td><code>@ffmpeg/core</code>, <code>@ffmpeg/core-mt</code></td><td>ffmpeg.wasm / 补丁依赖。</td></tr>
+            <tr><td><code>onnxruntime-web</code></td><td>浏览器端模型推理。</td></tr>
+            <tr><td><code>three</code></td><td>3D / 图形能力。</td></tr>
+            <tr><td><code>electron</code></td><td>桌面壳。</td></tr>
+            <tr><td><code>wrangler</code></td><td>Cloudflare Pages 部署。</td></tr>
+          </tbody>
+        </table>
+        <p class="small">未检测到数据库驱动或认证库；本地持久化主要体现为 <code>idb-keyval</code>、IndexedDB 与 localStorage。</p>
+      </section>
+
+      <section id="testing">
+        <h2>8. 测试</h2>
+        <ul>
+          <li><strong>Framework：</strong>Vitest + Playwright。</li>
+          <li><strong>Unit config：</strong><code>apps/web/vitest.config.ts</code>，jsdom，<code>src/**/*.test.ts(x)</code> / <code>*.spec.ts(x)</code>。</li>
+          <li><strong>E2E config：</strong><code>apps/web/playwright.config.ts</code>。</li>
+          <li><strong>E2E projects：</strong><code>gpu</code>、<code>fallback-nowebgpu</code>、<code>fallback-software</code>。</li>
+          <li><strong>E2E port：</strong>5391；CI 使用 Google Chrome（<code>OPENREEL_E2E_CHANNEL: chrome</code>）。</li>
+          <li><strong>Test files：</strong>约 1179 个 <code>*.test.*</code> / <code>*.spec.*</code> / <code>test_*</code> 文件（排除 node_modules、.git、dist）。</li>
+        </ul>
+        <pre><code>pnpm test          # watch
+pnpm test:run      # once
+pnpm test:e2e      # 在 apps/web 下</code></pre>
+        <p>额外门槛：<code>bundle:budget</code>、<code>perf:gate</code>、桌面 E2E、soak、memory gate。</p>
+      </section>
+
+      <section id="cicd">
+        <h2>9. CI/CD</h2>
+        <table>
+          <thead><tr><th>Workflow</th><th>触发</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td><code>.github/workflows/ci.yml</code></td><td>push / PR 到 <code>main</code>、<code>feat/ios-app</code></td><td>typecheck、lint、build:wasm、test、build、perf smoke、10 分片 E2E。</td></tr>
+            <tr><td><code>.github/workflows/perf-gate.yml</code></td><td>每周一 05:17 UTC + 手动</td><td>Web perf test、桌面真实窗口 perf budget。</td></tr>
+            <tr><td><code>.github/workflows/release.yml</code></td><td>未逐项读取</td><td>发布流程。</td></tr>
+            <tr><td><code>.github/workflows/desktop-readiness.yml</code></td><td>未逐项读取</td><td>桌面就绪检查。</td></tr>
+            <tr><td><code>.github/workflows/claude.yml</code></td><td>未逐项读取</td><td>Claude 相关自动化。</td></tr>
+          </tbody>
+        </table>
+        <p><code>ci.yml</code> 明确安装 Node 22、<code>pnpm install --frozen-lockfile</code>、<code>libxml2-utils</code>（xmllint）、<code>ffmpeg</code> 与 Google Chrome；E2E 分 10 片，每片约 18 分钟，见 <code>ci.yml:117-172</code>。</p>
+      </section>
+
+      <section id="notes">
+        <h2>10. 补充观察</h2>
+        <div class="callout">
+          <ul>
+            <li><strong>本地优先：</strong>README 明确“100% Client-Side”“No uploads”“No cloud processing”（<code>README.md:13-19</code>）。</li>
+            <li><strong>Monorepo：</strong><code>package.json:60-63</code> 与 <code>pnpm-workspace.yaml:1-3</code> 均定义 <code>apps/*</code> + <code>packages/*</code>。</li>
+            <li><strong>WASM 是构建前置条件：</strong>根 <code>build</code> 先执行 <code>build:wasm</code>（<code>package.json:9-10</code>），AssemblyScript 产物由 <code>packages/core</code> 的 <code>asc</code> 脚本生成。</li>
+            <li><strong>浏览器能力边界：</strong>WebGPU 不可用时回退 Canvas2D；Chrome/Edge 为推荐环境。</li>
+            <li><strong>图标资源极多：</strong><code>icons/</code> 下有 6430 个 SVG，因此扩展名统计里 SVG 远高于源码文件数。</li>
+            <li><strong>未检测到：</strong>根级 <code>Dockerfile</code>、<code>docker-compose.yml</code>、ESLint/Prettier 根配置；lint 配置在 <code>apps/web</code> 内。</li>
+            <li><strong>深入阅读：</strong>仓库已有 <code>docs/工程源码分析.html</code>，可作为比本概览更深入的中文源码地图。</li>
+          </ul>
+        </div>
+      </section>
+
+      <footer>
+        本文档由 <code>project-summary</code> skill 生成，保存于 2026-11-20。路径与行号以仓库当前状态为准。
+      </footer>
+    </article>
+  </div>
+</body>
+</html>

@@ -42,11 +42,14 @@ coverage/
 .cache/
 .temp/
 .docs/
+.archify/
 docs/*
 !docs/部署与操作指南.html
 !docs/工程源码分析.html
 !docs/编辑使用攻略.html
 !docs/界面英文菜单对照.html
+!docs/项目概览分析.html
+!docs/运行时架构图.html
 !docs/superpowers/
 !docs/android-port/
 !docs/ui-rewrite/
