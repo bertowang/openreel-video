@@ -110,7 +110,7 @@
         <span class="badge">Vite + pnpm workspace</span>
         <span class="badge">Zustand + @openreel/core</span>
         <span class="badge">WebCodecs / WebGPU / WASM</span>
-        <span class="badge">结构化重构版：2026-11-19</span>
+        <span class="badge">结构化重构版：2026-11-20</span>
       </div>
       <nav class="links">
         <a href="./界面英文菜单对照.html">界面英文菜单对照</a>
@@ -135,14 +135,15 @@
         <li><a href="#editor-ui">8. 编辑器 UI 组装</a></li>
         <li><a href="#core">9. 核心引擎 @openreel/core</a></li>
         <li><a href="#edit-principles">10. 音视频编辑操作的技术原理</a></li>
-        <li><a href="#agent-collab-services">11. Agent、协作与服务层</a></li>
-        <li><a href="#crosscut">12. 横切机制</a></li>
-        <li><a href="#testing">13. 测试与质量保障</a></li>
-        <li><a href="#reading-map">14. 深入阅读与修改索引</a></li>
-        <li><a href="#risks">15. 风险与维护提示</a></li>
-        <li><a href="#technology">16. 核心技术详解</a></li>
-        <li><a href="#codec-guide">17. 编解码背景程序员快速上手</a></li>
-        <li><a href="#appendix">18. 附录：关键文件索引</a></li>
+        <li><a href="#transition-internals">11. 视频转场与音频转场底层技术详解</a></li>
+        <li><a href="#agent-collab-services">12. Agent、协作与服务层</a></li>
+        <li><a href="#crosscut">13. 横切机制</a></li>
+        <li><a href="#testing">14. 测试与质量保障</a></li>
+        <li><a href="#reading-map">15. 深入阅读与修改索引</a></li>
+        <li><a href="#risks">16. 风险与维护提示</a></li>
+        <li><a href="#technology">17. 核心技术详解</a></li>
+        <li><a href="#codec-guide">18. 编解码背景程序员快速上手</a></li>
+        <li><a href="#appendix">19. 附录：关键文件索引</a></li>
       </ol>
       <p class="small" style="margin-top:14px"><a href="#top">回到顶部</a></p>
     </aside>
@@ -195,11 +196,11 @@
 
         <h3>1.4 推荐阅读路径</h3>
         <div class="route"><strong>不熟悉 Web 开发：</strong>先读 <a href="#browser-role">2. 浏览器在工程中的角色</a>，再按 1 → 3 → 4 的顺序看。</div>
-        <div class="route"><strong>新人快速上手：</strong>1 → 2 → 3 → 4 → 10 → 14</div>
-        <div class="route"><strong>做业务功能：</strong>7 → 8 → 9 → 10 → 14；再根据是否涉及 AI/协作看第 11 章。</div>
-        <div class="route"><strong>做性能或底层：</strong>4 → 9 → 10 → 16 → 13。</div>
-        <div class="route"><strong>有编解码算法背景：</strong>直接看 <a href="#codec-guide">17. 编解码背景程序员快速上手</a>，再回看 4、9、10、16。</div>
-        <div class="route"><strong>接手桌面端：</strong>5 → 6 → 16（Electron 条目）→ 15。</div>
+        <div class="route"><strong>新人快速上手：</strong>1 → 2 → 3 → 4 → 10 → 15</div>
+        <div class="route"><strong>做业务功能：</strong>7 → 8 → 9 → 10 → 15；涉及转场先看第 11 章，AI/协作看第 12 章。</div>
+        <div class="route"><strong>做性能或底层：</strong>4 → 9 → 10 → 11 → 17 → 13。</div>
+        <div class="route"><strong>有编解码算法背景：</strong>直接看 <a href="#codec-guide">18. 编解码背景程序员快速上手</a>，再回看 4、9、10、11、17。</div>
+        <div class="route"><strong>接手桌面端：</strong>5 → 6 → 17（Electron 条目）→ 16。</div>
       </section>
 
       <section id="browser-role">
@@ -279,7 +280,7 @@
             <tr><td>预览卡顿</td><td>WebGPU 不可用，回退 Canvas2D。</td><td>DevTools Performance、<code>chrome://gpu</code>。</td></tr>
             <tr><td>导出格式不可用</td><td>浏览器编码器不支持。</td><td>换 H.264/VP9 或使用桌面版。</td></tr>
             <tr><td>刷新后状态丢失</td><td>只改了内存，没写 IndexedDB。</td><td>DevTools Application 看 IndexedDB/localStorage。</td></tr>
-            <tr><td>界面没有中文</td><td>当前版本没有 UI i18n。</td><td>见 <a href="./界面英文菜单对照.html">英文菜单对照</a> 与 <a href="#crosscut">第 12 章</a>。</td></tr>
+            <tr><td>界面没有中文</td><td>当前版本没有 UI i18n。</td><td>见 <a href="./界面英文菜单对照.html">英文菜单对照</a> 与 <a href="#crosscut">第 13 章</a>。</td></tr>
           </tbody>
         </table>
 
@@ -603,11 +604,11 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
         │
         ▼
 输出这一帧的转场画面</code></div>
-        <p>常见类型包括 <code>crossfade</code>、<code>dipToBlack</code>、<code>dipToWhite</code>、<code>wipe</code>、<code>slide</code>、<code>push</code>、<code>zoom</code>、<code>glitch</code>、<code>flash</code> 等 24 种。默认两片段转场以切点为中心，窗口为 <code>[切点 - duration/2, 切点 + duration/2]</code>；也可由 <code>params.alignment</code> 改成完全在切点前或切点后。预览和导出最终都复用 <code>VideoEngine.renderFrame()</code> 里的活跃转场查找与渲染，所以不是两套完全不同的算法。</p>
+        <p>常见类型包括 <code>crossfade</code>、<code>dipToBlack</code>、<code>dipToWhite</code>、<code>wipe</code>、<code>slide</code>、<code>push</code>、<code>zoom</code>、<code>glitch</code>、<code>flash</code> 等 24 种。默认两片段转场以切点为中心，窗口为 <code>[切点 - duration/2, 切点 + duration/2]</code>；也可由 <code>params.alignment</code> 改成完全在切点前或切点后。预览和导出最终都复用 <code>VideoEngine.renderFrame()</code> 里的活跃转场查找与渲染，所以不是两套完全不同的算法。完整窗口规则、Canvas2D 合成算法与导出时间映射见 <a href="#transition-internals">第 11 章</a>。</p>
         <p class="small">源码入口：<code>packages/core/src/types/timeline.ts:137</code>、<code>:511-521</code>；<code>packages/core/src/types/effects.ts:571-597</code>；<code>packages/core/src/video/transition-engine.ts:86-257</code>、<code>:1542-1573</code>；<code>packages/core/src/video/video-engine.ts:2618-2655</code>、<code>:2754-2846</code>；<code>apps/web/src/bridges/transition-bridge.ts:117-210</code>。转场核心是 OffscreenCanvas 2D，<code>renderTransition()</code> 返回中明确标记 <code>gpuAccelerated: false</code>；未找到 WebGPU transition renderer。</p>
 
         <h4 style="margin:16px 0 8px;color:var(--brand2)">转场如何确保音画同步</h4>
-        <p>这里要区分两个概念：<strong>时间对齐</strong>是默认存在的，<strong>音频交叉淡化</strong>不是默认存在的。转场使用的是同一条时间线秒轴：画面从 A/B 两路按 <code>T</code> 取帧，音频 clip 也按 <code>T</code> 映射到各自的源时间。因此播放头、画面转场进度、音频调度和导出帧都锚定在同一个 timeline 时间上，不会各走各的时钟。</p>
+        <p>这里要区分两个概念：<strong>时间对齐</strong>是默认存在的，<strong>音频交叉淡化</strong>不是默认存在的。转场使用的是同一条时间线秒轴：画面从 A/B 两路按 <code>T</code> 取帧，音频 clip 也按 <code>T</code> 映射到各自的源时间。因此播放头、画面转场进度、音频调度和导出帧都锚定在同一个 timeline 时间上，不会各走各的时钟；但视频窗口与音频淡变锚定规则并不相同，详见 <a href="#transition-internals">第 11 章</a>。</p>
         <p>但是，视频做了 crossfade 并不代表声音自动 crossfade。源码中音频淡变只有在 <code>transition.params.audioFade === true</code> 时才会启用；默认 <code>false</code>，且默认转场参数不会自动写入该开关。启用后，对 clip-to-clip 转场，A 的尾部做 <code>duration / 2</code> 的 fade out，B 的头部做 <code>duration / 2</code> 的 fade in；对单 clip edge 转场使用完整 <code>duration</code>。音频淡变按 clip edge 锚定，并不复用视频转场的 alignment 窗口。</p>
         <table>
           <thead><tr><th>场景</th><th>画面</th><th>声音</th></tr></thead>
@@ -633,7 +634,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
         </table>
 
         <h3>10.7 音画同步是怎么做到的</h3>
-        <p>工程内部时间统一用<strong>秒（浮点数）</strong>表示。视频按帧率换算成帧号，音频按采样率换算成采样点索引。播放时浏览器用 <code>requestAnimationFrame</code> 驱动画面，用 <code>AudioContext.currentTime</code> 作为音频时钟参考；导出时不再依赖实时时钟，而是按固定时间步长逐帧计算。转场本身也遵守这套统一时间轴；转场期间是否让声音一起淡入淡出，则取决于 <code>audioFade</code> 开关，见 10.5。</p>
+        <p>工程内部时间统一用<strong>秒（浮点数）</strong>表示。视频按帧率换算成帧号，音频按采样率换算成采样点索引。播放时浏览器用 <code>requestAnimationFrame</code> 驱动画面，用 <code>AudioContext.currentTime</code> 作为音频时钟参考；导出时不再依赖实时时钟，而是按固定时间步长逐帧计算。转场本身也遵守这套统一时间轴；转场期间是否让声音一起淡入淡出，则取决于 <code>audioFade</code> 开关；窗口与淡变锚点的差异见 <a href="#transition-internals">第 11 章</a>。</p>
 
         <h3>10.8 为什么采用这种设计</h3>
         <ul>
@@ -682,15 +683,276 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
         </div>
       </section>
 
+      <section id="transition-internals">
+        <h2>11. 视频转场与音频转场底层技术详解</h2>
+        <div class="route"><strong>本节回答：</strong>第 10 章说明了“转场是一种编辑操作”；本章继续回答“它如何变成每一帧画面和每一段增益自动化”？视频与音频是否共用同一套时间规则？</div>
+        <p>转场最容易被误解成“两个视频文件被混合成一个新文件”。在这个工程里，转场始终是一份<strong>编辑描述</strong>：保存在 <code>Track.transitions</code>，由视频侧和音频侧分别读取、分别求值，最后才在预览或导出时汇合。</p>
+
+        <h3>11.1 心智模型：一份描述，两次独立求值</h3>
+        <div class="flow"><code>一份 Transition 描述（type / duration / params）
+        │
+        ├── 视频侧：找活跃窗口 → 取 A/B 两路帧 → Canvas2D 合成
+        │
+        └── 音频侧：audioFade? → 计算 clip 边缘淡变 → GainNode automation
+        │
+        ▼
+预览画面 + 声音 / 导出文件</code></div>
+        <table>
+          <thead><tr><th>层次</th><th>职责</th><th>是否改原始媒体</th></tr></thead>
+          <tbody>
+            <tr><td>数据层</td><td><code>Transition</code> 记录类型、时长、关联 clip 与参数。</td><td>否</td></tr>
+            <tr><td>视频侧</td><td><code>VideoEngine</code> 找活跃转场，<code>TransitionEngine</code> 合成每帧。</td><td>否</td></tr>
+            <tr><td>音频侧</td><td><code>transition-audio-fades.ts</code> 生成 fade 区间，<code>clip-fade-envelope.ts</code> 写成增益曲线。</td><td>否；预览是节点自动化，导出时才烘焙进结果。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>11.2 数据结构与约束</h3>
+        <p><code>Transition</code> 定义在 <code>packages/core/src/types/timeline.ts:513-521</code>。它不是独立顶层对象，而是挂在 <code>Track.transitions</code> 上，见 <code>timeline.ts:137</code>。</p>
+        <table>
+          <thead><tr><th>字段</th><th>含义</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td><code>id</code></td><td>转场唯一标识。</td><td>用于更新、删除、撤销。</td></tr>
+            <tr><td><code>clipAId</code></td><td>转场的前一个 / 主片段。</td><td>在同一 track 的 clips 中按 ID 查找。</td></tr>
+            <tr><td><code>clipBId?</code></td><td>后一个片段。</td><td>缺省时按 <code>edge</code> 做单 clip 边缘转场。</td></tr>
+            <tr><td><code>edge?</code></td><td><code>"in" | "out"</code>。</td><td>见 <code>timeline.ts:511</code>。</td></tr>
+            <tr><td><code>type</code></td><td>转场类型。</td><td>共 24 种，见 <code>effects.ts:571-597</code>。</td></tr>
+            <tr><td><code>duration</code></td><td>秒。</td><td>窗口和音频 fade 都直接拿它做秒级运算。</td></tr>
+            <tr><td><code>params</code></td><td>动态参数。</td><td><code>alignment</code>、<code>curve</code>、<code>audioFade</code>、方向、softness 等都在这里。</td></tr>
+          </tbody>
+        </table>
+        <p><strong>24 种类型：</strong><code>crossfade</code>、<code>dipToBlack</code>、<code>dipToWhite</code>、<code>wipe</code>、<code>slide</code>、<code>zoom</code>、<code>push</code>、<code>circleReveal</code>、<code>blur</code>、<code>whipPan</code>、<code>radialWipe</code>、<code>pixelate</code>、<code>glitch</code>、<code>blinds</code>、<code>diamondReveal</code>、<code>spin</code>、<code>flip</code>、<code>splitReveal</code>、<code>flash</code>、<code>filmBurn</code>、<code>mosaic</code>、<code>ripple</code>、<code>pageTurn</code>、<code>colorSplit</code>。</p>
+        <p><strong>创建与校验：</strong>Action 有 <code>transition/add</code>、<code>transition/set</code>、<code>transition/remove</code>、<code>transition/update</code>，见 <code>types/actions.ts:351-372</code>。校验器要求同轨、相邻，时间容差 <code>0.001</code> 秒，且 <code>duration &gt; 0</code>，见 <code>action-validator.ts:1165-1320</code>。注意：这是<strong>创建/编辑时</strong>的约束；运行时 <code>VideoEngine</code> 只按 ID 在同轨查找，没有再次调用相邻性校验。</p>
+
+        <h3>11.3 视频侧：时间窗口、活跃查找与取帧</h3>
+        <p><code>VideoEngine.renderFrame(project, time, ...)</code> 的 <code>time</code> 是时间线秒。每条视频轨在渲染时调用 <code>renderActiveTransition()</code> 查找当前时间是否落入某个转场窗口。</p>
+        <div class="flow"><code>遍历 track.transitions
+        │
+        ├── 用 clipAId / clipBId 在同一 track 找 clip
+        ├── isTimeInTransition(T) 判断 T 是否在窗口内
+        ├── calculateTransitionProgress(T) 求 0→1 进度
+        └── 多个窗口重叠时，返回数组里第一个命中项
+        │
+        ▼
+用同一个绝对时间 T 解码 A / B 两路帧</code></div>
+        <p>窗口由 <code>getTransitionWindow()</code> 计算，见 <code>transition-engine.ts:1542-1573</code>：</p>
+        <table>
+          <thead><tr><th>场景</th><th>窗口</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><code>edge: "in"</code></td><td><code>[clipStart, clipStart + duration]</code></td><td>片段开头淡入。</td></tr>
+            <tr><td><code>edge: "out"</code> 或无 B</td><td><code>[clipEnd - duration, clipEnd]</code></td><td>片段结尾淡出。</td></tr>
+            <tr><td><code>params.alignment: "start"</code></td><td><code>[cutPoint, cutPoint + duration]</code></td><td>完全在切点后，B 侧。</td></tr>
+            <tr><td><code>params.alignment: "end"</code></td><td><code>[cutPoint - duration, cutPoint]</code></td><td>完全在切点前，A 侧。</td></tr>
+            <tr><td>默认 / <code>"center"</code></td><td><code>[cutPoint - duration/2, cutPoint + duration/2]</code></td><td>以切点为中心。</td></tr>
+          </tbody>
+        </table>
+        <p>端点包含在内：<code>currentTime &gt;= start &amp;&amp; currentTime &lt;= end</code>，没有额外容差，见 <code>transition-engine.ts:1532-1540</code>。A/B 两路都用同一个绝对时间 <code>T</code> 调 <code>decodeClipBitmap()</code>，源时间再按 clip 的 <code>inPoint/outPoint</code> 钳制，见 <code>video-engine.ts:2718-2734</code>、<code>:2789-2794</code>。单 clip edge 转场会用透明 bitmap 代替另一路，并交换 outgoing/incoming，见 <code>video-engine.ts:2828-2838</code>。</p>
+
+        <h3>11.4 TransitionEngine：Canvas2D 帧合成算法</h3>
+        <p><code>renderTransition()</code> 的输入是 <code>outgoingFrame</code>、<code>incomingFrame</code>、<code>transition</code>、<code>progress</code>；输出是 <code>{ frame: ImageBitmap, processingTime, gpuAccelerated }</code>，见 <code>transition-engine.ts:209-229</code>。统一预处理会 clamp progress、套用 easing、letterbox A/B、清空画布，再按类型分发，见 <code>:231-257</code>。</p>
+        <table>
+          <thead><tr><th>算法族</th><th>代表类型</th><th>核心手段</th><th>源码</th></tr></thead>
+          <tbody>
+            <tr><td>透明度混合</td><td><code>crossfade</code></td><td><code>globalAlpha = 1-p / p</code>，两次 <code>drawImage()</code>。</td><td><code>:475-489</code></td></tr>
+            <tr><td>纯色过渡</td><td><code>dipToBlack</code>、<code>dipToWhite</code></td><td>淡出 → <code>fillStyle + fillRect</code> 保持 → 淡入。</td><td><code>:491-525</code></td></tr>
+            <tr><td>路径裁剪</td><td><code>wipe</code>、<code>radialWipe</code>、<code>circleReveal</code></td><td><code>beginPath / rect / arc / clip</code> 后画 B；softness 用多段 alpha 近似。</td><td><code>:527-641</code></td></tr>
+            <tr><td>空间变换</td><td><code>slide</code>、<code>push</code>、<code>zoom</code>、<code>spin</code>、<code>flip</code></td><td><code>translate / scale / rotate</code> 改变两路帧位置与尺寸。</td><td><code>:643-729</code>、<code>:731-1055</code></td></tr>
+            <tr><td>程序化画面</td><td><code>glitch</code>、<code>flash</code>、<code>pixelate</code>、<code>mosaic</code></td><td><code>sin()</code> 伪随机切片、白色叠层、像素化采样等。</td><td><code>:886-910</code>、<code>:1057-1073</code>、<code>:1101-1274</code></td></tr>
+          </tbody>
+        </table>
+        <p><strong>Easing</strong> 在 <code>transition-engine.ts:1276-1292</code>：支持 <code>linear</code>、<code>ease</code>（smoothstep）、<code>ease-in</code>、<code>ease-out</code>、<code>ease-in-out</code>；缺省 <code>linear</code>，未知曲线回退 linear。</p>
+        <p class="small">重要边界：画布是 <code>OffscreenCanvas</code> + <code>getContext("2d")</code>，见 <code>:109-124</code>；<code>renderTransition()</code> 明确返回 <code>gpuAccelerated: false</code>，见 <code>:224-228</code>。未找到 WebGPU transition renderer。未识别类型会回退到 crossfade，见 <code>:468-469</code>。</p>
+
+        <h4 style="margin:16px 0 8px;color:var(--brand2)">算法拆解：视频 crossfade 的底层实现</h4>
+        <p>选 <code>crossfade</code> 作为代表，是因为它最直观地展示了“转场进度 → 像素混合”的完整链路。它不逐像素跑 JS 循环，而是把混合交给 Canvas2D 的 alpha 合成。</p>
+        <ol>
+          <li><strong>归一化进度</strong>：<code>progress</code> 先被 clamp 到 <code>[0, 1]</code>，再按 <code>transition.params.curve</code> 求 <code>easedProgress</code>。缺曲线用 <code>linear</code>，未知曲线也回退 <code>linear</code>，见 <code>transition-engine.ts:242-246</code>、<code>:1281-1292</code>。</li>
+          <li><strong>画幅对齐</strong>：<code>fitToCanvas(A/B)</code> 先把两路帧 letterbox 到工程画布，避免竖屏素材在横屏工程里被拉伸，见 <code>:248-254</code>。</li>
+          <li><strong>清空画布</strong>：<code>clearRect(0, 0, width, height)</code>，保证每帧从干净状态开始合成，见 <code>:256</code>。</li>
+          <li><strong>两次绘制</strong>：先以 <code>globalAlpha = 1 - e</code> 画旧帧 A，再以 <code>globalAlpha = e</code> 画新帧 B，最后把 <code>globalAlpha</code> 复位为 <code>1</code>，见 <code>:475-489</code>。</li>
+          <li><strong>产出帧</strong>：对合成后的 <code>OffscreenCanvas</code> 调 <code>createImageBitmap()</code>，返回 <code>TransitionRenderResult</code>，见 <code>:209-229</code>。</li>
+        </ol>
+        <pre><code>p = clamp(progress, 0, 1)
+e = easing(p, transition.params.curve)
+A = fitToCanvas(outgoingFrame, "A")
+B = fitToCanvas(incomingFrame, "B")
+ctx.clearRect(0, 0, width, height)
+ctx.globalAlpha = 1 - e
+ctx.drawImage(A, 0, 0, width, height)
+ctx.globalAlpha = e
+ctx.drawImage(B, 0, 0, width, height)
+ctx.globalAlpha = 1
+return createImageBitmap(canvas)</code></pre>
+        <p>对不透明像素，结果可近似理解为：</p>
+        <pre><code>out = A * (1 - e) + B * e</code></pre>
+        <p>其中 <code>e</code> 不是原始进度，而是 easing 后的进度。若输入帧本身带 alpha，浏览器按 Canvas2D 的 source-over 规则合成，而不是简单的线性公式。</p>
+        <table>
+          <thead><tr><th>边界</th><th>结果</th></tr></thead>
+          <tbody>
+            <tr><td><code>p = 0</code></td><td>A 完全可见，B 完全透明，输出等同旧帧。</td></tr>
+            <tr><td><code>p = 1</code></td><td>A 完全透明，B 完全可见，输出等同新帧。</td></tr>
+            <tr><td>画幅不同</td><td>先 letterbox，再混合；不会把素材横向拉伸。</td></tr>
+            <tr><td>未知 curve</td><td>回退 <code>linear</code>，不会因为脏参数中断渲染。</td></tr>
+          </tbody>
+        </table>
+        <p class="small">成本模型：一次 clear + 两次 drawImage + 一次 createImageBitmap；混合由 Canvas2D 完成，JS 侧没有逐像素循环。源码：<code>packages/core/src/video/transition-engine.ts:209-257</code>、<code>:475-489</code>、<code>:1276-1292</code>。</p>
+
+        <h4 style="margin:16px 0 8px;color:var(--brand2)">底层技术与 GPU 边界：Canvas2D，不是 WebGPU</h4>
+        <p>视频转场的核心技术栈是 <strong>OffscreenCanvas + Canvas2D</strong>。它不逐像素跑 JS 循环，而是把 alpha 混合、路径裁剪、空间变换交给浏览器的 2D 绘图管线；easing 进度则由 JS 计算后传给绘图 API。</p>
+        <table>
+          <thead><tr><th>技术</th><th>在转场里的作用</th><th>证据</th></tr></thead>
+          <tbody>
+            <tr><td><code>OffscreenCanvas</code></td><td>离屏合成画布，不依赖页面上可见的 canvas。</td><td><code>transition-engine.ts:86-124</code></td></tr>
+            <tr><td><code>OffscreenCanvasRenderingContext2D</code></td><td>实际执行混合、裁剪、位移、旋转、填充。</td><td><code>:113-116</code></td></tr>
+            <tr><td><code>ImageBitmap</code></td><td>输入 A/B 帧与输出合成帧的载体。</td><td><code>:209-229</code></td></tr>
+            <tr><td><code>createImageBitmap(canvas)</code></td><td>把合成后的 canvas 变成后续渲染/编码可用的帧。</td><td><code>:222</code></td></tr>
+            <tr><td>Canvas2D API</td><td><code>globalAlpha</code>、<code>drawImage</code>、<code>clip</code>、<code>translate</code>、<code>scale</code>、<code>rotate</code>、<code>fillRect</code>、<code>filter</code> 等。</td><td><code>:475-1274</code></td></tr>
+            <tr><td>JS easing</td><td>把线性进度变成 ease / ease-in / ease-out 等曲线进度。</td><td><code>:1276-1292</code></td></tr>
+          </tbody>
+        </table>
+        <p><strong>有启用 GPU 吗？结论是：代码层没有。</strong><code>TransitionEngine</code> 获取的是 <code>getContext("2d")</code>，没有 WebGPU 初始化、没有 <code>GPUCanvasContext</code>、没有 WGSL shader，也没有把 A/B 帧上传成 GPU texture。<code>renderTransition()</code> 还主动返回 <code>gpuAccelerated: false</code>，见 <code>:224-228</code>。这里的 <code>gpuAccelerated</code> 是结果标记，不是性能开关。</p>
+        <p>需要区分三层含义：</p>
+        <table>
+          <thead><tr><th>层次</th><th>结论</th></tr></thead>
+          <tbody>
+            <tr><td>工程代码层</td><td>没有显式启用 GPU；转场实现是 Canvas2D。</td></tr>
+            <tr><td>浏览器实现层</td><td>Canvas2D 可能被浏览器内部用 GPU 合成优化，但这是浏览器实现细节，工程不控制、不保证、也不在结果里声明。</td></tr>
+            <tr><td>导出编码层</td><td>WebCodecs 编码器可能配置硬件加速偏好，但那是编码阶段，不是转场合成阶段。</td></tr>
+          </tbody>
+        </table>
+        <p>这样设计的原因很实际：24 种转场大多可以用 2D 的 alpha、clip、transform 表达；OffscreenCanvas 可以离屏处理；在 CI 或没有 GPU 的环境里行为更一致；也不需要为每种转场维护 shader。代价是复杂转场在 4K 或密集时间线上受 Canvas2D 性能影响，且无法利用 GPU 并行像素计算。</p>
+        <p>如果以后要加 GPU 路径，合理做法不是直接替换现有实现，而是新增 WebGPU renderer：检测 <code>navigator.gpu</code>，把 A/B 帧上传成两张 texture，用 WGSL shader 按 eased progress 混合，输出后再走原有帧管线；同时保留 Canvas2D fallback，并用像素级对比测试保证两条路径在容差内一致。</p>
+        <p class="small">源码：<code>packages/core/src/video/transition-engine.ts:86-124</code>、<code>:209-229</code>、<code>:224-228</code>、<code>:475-1274</code>、<code>:1276-1292</code>。</p>
+
+        <h3>11.5 预览与导出如何复用同一套转场</h3>
+        <p>转场有两条入口，但最终都落到同一个 <code>TransitionEngine</code>：</p>
+        <table>
+          <thead><tr><th>入口</th><th>链路</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>Web Program Monitor</td><td><code>TransitionInspector</code> / 时间线 → <code>transition-bridge</code> → <code>TransitionEngine</code></td><td>预览桥直接调用转场引擎，见 <code>transition-bridge.ts:117-170</code>、<code>:630-727</code>。</td></tr>
+            <tr><td>播放 / 导出</td><td><code>PlaybackController</code> / <code>ExportEngine</code> → <code>VideoEngine.renderFrame()</code> → <code>TransitionEngine</code></td><td>见 <code>playback-controller.ts:445-463</code>、<code>export-engine.ts:443-460</code>。</td></tr>
+          </tbody>
+        </table>
+        <p>导出按固定时间步求值：总帧数由 <code>exportDuration * frameRate</code> 得到，见 <code>export-engine.ts:299</code>；每帧用 <code>time = frame / frameRate</code>，再以 <code>exportStart + time</code> 渲染，见 <code>:443-460</code>。因此导出不依赖真实播放时钟，转场进度每一帧都是确定的。</p>
+
+        <h3>11.6 音频侧：audioFade 与 GainNode 自动化</h3>
+        <p>视频做了 crossfade，声音<strong>不会自动</strong> crossfade。音频淡变只在 <code>transition.params.audioFade === true</code> 时生效，见 <code>transition-audio-fades.ts:14-16</code>。代码里没有在类型定义中写死 <code>audioFade: false</code>，但语义上默认关闭：默认参数表不含该键，UI 用 <code>(params.audioFade as boolean) ?? false</code> 显示开关。</p>
+        <table>
+          <thead><tr><th>场景</th><th>音频规则</th><th>源码</th></tr></thead>
+          <tbody>
+            <tr><td>clip-to-clip</td><td><code>sideDuration = duration / 2</code>；A 尾部 fade out，B 头部 fade in。</td><td><code>transition-audio-fades.ts:17-21</code></td></tr>
+            <tr><td><code>edge: "in"</code></td><td>A 完整 <code>duration</code> fade in。</td><td><code>:23-25</code></td></tr>
+            <tr><td><code>edge: "out"</code> 或无 B</td><td>A 完整 <code>duration</code> fade out。</td><td><code>:23-25</code></td></tr>
+            <tr><td>多个转场</td><td>同一 clip 同一类 fade 取 <code>Math.max()</code> 累积。</td><td><code>:8-27</code></td></tr>
+          </tbody>
+        </table>
+        <p>淡变区间写进 <code>GainNode</code> 时，锚点是 clip 本地时间 <code>0</code> 或 <code>clipDuration</code>，见 <code>clip-fade-envelope.ts:80-81</code>。如果用户也设置了手动 fade，程序取“用户 fade 与转场 fade”的分段线性最小值，避免其中一方被突破，见 <code>:82-88</code>、<code>:121-126</code>。最终通过 <code>cancelScheduledValues</code>、<code>setValueAtTime</code>、<code>linearRampToValueAtTime</code> 写入自动化，见 <code>:129-142</code>。</p>
+        <p>实时预览由 <code>PlaybackController</code> 生成 schedule 时取 fade，再由 <code>RealtimeAudioGraph</code> 写入节点，见 <code>playback-controller.ts:657-675</code>、<code>realtime-audio-graph.ts:1010-1018</code>。离线混音由 <code>AudioEngine</code> 在 <code>OfflineAudioContext</code> 中调用 <code>applyFades()</code>，见 <code>audio-engine.ts:330-340</code>、<code>:744-750</code>、<code>:1073-1088</code>。</p>
+
+        <h4 style="margin:16px 0 8px;color:var(--brand2)">算法拆解：音频 crossfade（audioFade）的底层实现</h4>
+        <p>音频侧选 <code>audioFade</code> 作为代表，恰好可以和视频 <code>crossfade</code> 对照：视频把进度变成 alpha，音频把进度变成 <code>GainNode.gain</code> 的自动化曲线。它不修改采样值，而是调度增益参数。</p>
+        <ol>
+          <li><strong>筛选转场</strong>：遍历当前轨道的 transitions，只有 <code>params.audioFade === true</code> 才参与；否则跳过，见 <code>transition-audio-fades.ts:14-16</code>。</li>
+          <li><strong>求 fade 长度</strong>：先把 <code>duration</code> 限制为非负；clip-to-clip 用 <code>duration / 2</code>，A 得到 fadeOut、B 得到 fadeIn；edge 转场让 A 使用完整 <code>duration</code>；同一 clip 同一类 fade 用 <code>Math.max()</code> 累积，见 <code>:16-26</code>。</li>
+          <li><strong>构造 ramp</strong>：用户手动 fade 与转场 fade 都转成 <code>0..1</code> 的线性斜坡。转场 fade 锚定在 clip 本地 <code>0</code> 和 <code>clipDuration</code>，见 <code>clip-fade-envelope.ts:80-81</code>。</li>
+          <li><strong>取包络</strong>：最终增益是对时刻 <code>t</code> 所有 ramp 值取 <code>min</code>，见 <code>:82-88</code>、<code>:121-126</code>。程序会把边界、零/满点和相邻 ramp 的交点都加入 corners，避免 <code>linearRampToValueAtTime</code> 在两点之间切掉某个 fade 的峰值，见 <code>:89-120</code>。</li>
+          <li><strong>写 AudioParam</strong>：先 <code>cancelScheduledValues(startTime)</code>，再 <code>setValueAtTime(first.value)</code>，随后对每个拐点调用 <code>linearRampToValueAtTime(point.value, startTime + point.time)</code>，见 <code>:129-142</code>。</li>
+        </ol>
+        <pre><code>fadeIn = 0
+fadeOut = 0
+for t in track.transitions:
+  if t.params.audioFade !== true: continue
+  d = Math.max(0, t.duration)
+  if t.clipBId:
+    side = d / 2
+    if t.clipAId == clipId: fadeOut = Math.max(fadeOut, side)
+    if t.clipBId == clipId: fadeIn  = Math.max(fadeIn, side)
+    continue
+  if t.clipAId != clipId: continue
+  if t.edge == "in": fadeIn  = Math.max(fadeIn, d)
+  else:              fadeOut = Math.max(fadeOut, d)
+
+ramps = [
+  userFadeIn,
+  userFadeOut,
+  transitionFadeIn(anchor = 0,            length = fadeIn),
+  transitionFadeOut(anchor = clipDuration, length = fadeOut)
+]
+points = piecewiseLinearMinimum(ramps, rangeStart, rangeEnd)
+
+gain.cancelScheduledValues(startTime)
+gain.setValueAtTime(points[0].value, startTime)
+for each point after the first:
+  gain.linearRampToValueAtTime(point.value, startTime + point.time)</code></pre>
+        <p>实时预览在 <code>source.start()</code> 之前写入这条曲线，并补偿路由/效果链延迟，见 <code>realtime-audio-graph.ts:1000-1018</code>。离线混音在 <code>OfflineAudioContext</code> 中对同一函数传入不同的 <code>startTime</code> 与 clip 信息，见 <code>audio-engine.ts:1073-1088</code>。因此“预览”和“导出”共享算法，但运行在不同的 AudioContext 上。</p>
+        <table>
+          <thead><tr><th>对照项</th><th>视频 crossfade</th><th>音频 crossfade</th></tr></thead>
+          <tbody>
+            <tr><td>被调度的量</td><td>Canvas 像素的 <code>globalAlpha</code>。</td><td><code>GainNode.gain</code> 的 AudioParam。</td></tr>
+            <tr><td>数学形式</td><td><code>out = A*(1-e) + B*e</code>。</td><td><code>g(t) = min(ramp₁(t), ramp₂(t), ...)</code>。</td></tr>
+            <tr><td>执行粒度</td><td>每帧一次合成。</td><td>一次调度，音频线程按采样点执行。</td></tr>
+            <tr><td>默认行为</td><td>转场命中时视觉转场一定生效。</td><td>只有 <code>audioFade === true</code> 才生效。</td></tr>
+            <tr><td>锚点</td><td><code>params.alignment</code> 决定窗口。</td><td>clip 本地 <code>0</code> / <code>clipDuration</code>。</td></tr>
+          </tbody>
+        </table>
+        <p class="small">源码：<code>packages/core/src/audio/transition-audio-fades.ts:8-27</code>、<code>packages/core/src/audio/clip-fade-envelope.ts:22-142</code>、<code>packages/core/src/audio/realtime-audio-graph.ts:1000-1018</code>、<code>packages/core/src/audio/audio-engine.ts:1073-1088</code>。</p>
+
+        <h3>11.7 音画同步：共享秒轴，但不共享 alignment</h3>
+        <table>
+          <thead><tr><th>维度</th><th>视频转场</th><th>音频淡变</th></tr></thead>
+          <tbody>
+            <tr><td>时间基准</td><td>时间线秒，<code>renderFrame(project, time)</code>。</td><td>同一时间线秒，映射到 clip 本地采样点。</td></tr>
+            <tr><td>窗口锚点</td><td><code>params.alignment</code>：start / center / end。</td><td>不读 alignment；只按 clip 边缘与 <code>duration</code>。</td></tr>
+            <tr><td>播放时钟</td><td><code>requestAnimationFrame</code> 驱动画面。</td><td><code>AudioContext.currentTime</code> 由 <code>MasterTimelineClock</code> 推导时间线时间。</td></tr>
+            <tr><td>导出</td><td><code>time = frame / frameRate</code> 固定步长。</td><td>同一 <code>exportStart / exportDuration</code> 范围内离线混音。</td></tr>
+          </tbody>
+        </table>
+        <p>所以“同步”的准确含义是：<strong>双方使用同一条秒轴和同一组 clip 边界，但不必使用相同的窗口形状</strong>。如果希望声音和画面在听感/观感上完全一致，要把 <code>alignment</code> 设为 <code>center</code>，并显式打开 <code>audioFade</code>；即便如此，音频仍按 clip edge 锚定，而不是直接复用视频窗口对象。</p>
+        <p class="small">源码入口：<code>master-timeline-clock.ts:42-59</code>、<code>:118-163</code>、<code>:176-208</code>；<code>playback-controller.ts:203-205</code>、<code>:445-463</code>、<code>:657-675</code>；<code>export-engine.ts:299</code>、<code>:443-460</code>、<code>:1382-1387</code>。</p>
+
+        <h3>11.8 常见坑与排查清单</h3>
+        <table>
+          <thead><tr><th>现象</th><th>先查什么</th></tr></thead>
+          <tbody>
+            <tr><td>画面有转场，声音没有渐变</td><td><code>audioFade</code> 是否为 <code>true</code>；仅加视觉转场不会改声音。</td></tr>
+            <tr><td>声音渐变和画面不同步</td><td>视频 <code>alignment</code> 是否为 <code>center</code>；音频只用 clip edge + duration/2。</td></tr>
+            <tr><td>转场只出现一半</td><td><code>duration</code>、clip 边界、<code>alignment</code> 组合后窗口是否超出片段。</td></tr>
+            <tr><td>转场没生效</td><td>两个 clip 是否在同轨、是否相邻、创建时校验容差 <code>0.001</code> 秒。</td></tr>
+            <tr><td>导出与预览不同</td><td>预览可能经 Web Program Monitor bridge；导出经 <code>VideoEngine.renderFrame()</code> 固定步长。</td></tr>
+            <tr><td>以为用了 GPU</td><td><code>renderTransition()</code> 返回 <code>gpuAccelerated: false</code>；核心是 Canvas2D。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>11.9 关键源码入口</h3>
+        <table>
+          <thead><tr><th>主题</th><th>文件</th></tr></thead>
+          <tbody>
+            <tr><td>数据结构与类型</td><td><code>packages/core/src/types/timeline.ts</code>、<code>packages/core/src/types/effects.ts</code></td></tr>
+            <tr><td>转场算法</td><td><code>packages/core/src/video/transition-engine.ts</code></td></tr>
+            <tr><td>视频活跃转场查找</td><td><code>packages/core/src/video/video-engine.ts</code></td></tr>
+            <tr><td>预览桥</td><td><code>apps/web/src/bridges/transition-bridge.ts</code>、<code>apps/web/src/components/editor/preview/canvas-renderers.ts</code></td></tr>
+            <tr><td>导出求值</td><td><code>packages/core/src/export/export-engine.ts</code></td></tr>
+            <tr><td>音频淡变</td><td><code>packages/core/src/audio/transition-audio-fades.ts</code>、<code>packages/core/src/audio/clip-fade-envelope.ts</code></td></tr>
+            <tr><td>实时 / 离线音频</td><td><code>packages/core/src/audio/realtime-audio-graph.ts</code>、<code>packages/core/src/audio/audio-engine.ts</code></td></tr>
+            <tr><td>时钟</td><td><code>packages/core/src/playback/master-timeline-clock.ts</code>、<code>packages/core/src/playback/playback-controller.ts</code></td></tr>
+            <tr><td>Action 与校验</td><td><code>packages/core/src/types/actions.ts</code>、<code>packages/core/src/actions/action-validator.ts</code></td></tr>
+            <tr><td>UI 入口</td><td><code>apps/web/src/components/editor/panels/EffectsTransitionsPanel.tsx</code>、<code>apps/web/src/components/editor/inspector/TransitionInspector.tsx</code></td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout brand2">
+          <p><strong>一句话总结：</strong>视频转场是“同一时间取两路帧，再用 Canvas2D 按进度合成”；音频转场是“可选地把 clip 边缘写成 GainNode 淡变曲线”。二者共享时间线秒轴，但默认不共享音量变化，也不共享 alignment 窗口。</p>
+        </div>
+      </section>
+
       <section id="agent-collab-services">
-        <h2>11. Agent、协作与服务层</h2>
+        <h2>12. Agent、协作与服务层</h2>
         <div class="route"><strong>本节回答：</strong>AI 和多人协作如何复用编辑能力？服务层还负责什么？</div>
-        <h3>11.1 AI Agent</h3>
+        <h3>12.1 AI Agent</h3>
         <p><code>packages/agent</code> 注册约 452 个工具；<code>registry.ts</code> 提供 <code>getTool/listTools/toAnthropicTools/toOpenAITools/toMcpTools</code>；<code>executor.ts</code> 解析 clipIndex/atSec 并调用 handler；<code>tool-router.ts</code> 默认最多选 120 个工具；<code>runTurn</code> 驱动多轮工具调用。</p>
         <p>Web 接入链路：<code>ChatPanel</code> → <code>chat-store.ts:281-309</code> 构造 EditingSession → BYOK LLM → <code>agent.runTurn</code> → 事件映射成工具卡 → <code>live-host.ts</code> 落到 ActionExecutor。</p>
-        <h3>11.2 协作</h3>
+        <h3>12.2 协作</h3>
         <p>同步单位是 core 的 undoable action；一个 op 包含多个 action。<code>WireOp</code> 含 opId、baseSeq、actions、touches、locks；<code>touches.ts</code> 做冲突键映射；<code>RoomCore</code> 排序、软锁、presence；<code>ClientEngine</code> 维护 base+live 重放；云端 <code>room-do.ts</code> 用 Durable Object 持久化房间。</p>
-        <h3>11.3 Web 服务层速查</h3>
+        <h3>12.3 Web 服务层速查</h3>
         <table>
           <thead><tr><th>领域</th><th>关键文件</th><th>作用</th></tr></thead>
           <tbody>
@@ -706,7 +968,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
       </section>
 
       <section id="crosscut">
-        <h2>12. 横切机制</h2>
+        <h2>13. 横切机制</h2>
         <div class="route"><strong>本节回答：</strong>哪些机制贯穿多个模块，容易在排查时忽略？</div>
         <ul>
           <li><strong>懒加载与预取</strong>：<code>services/lazy-engines.ts</code> 让约 1.4 MB 引擎不进入启动 chunk；<code>editor-loader.ts</code> 预热编辑器。</li>
@@ -721,7 +983,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
       </section>
 
       <section id="testing">
-        <h2>13. 测试与质量保障</h2>
+        <h2>14. 测试与质量保障</h2>
         <div class="route"><strong>本节回答：</strong>改动后怎么验证？有哪些自动化门槛？</div>
         <table>
           <thead><tr><th>类型</th><th>入口</th><th>说明</th></tr></thead>
@@ -738,10 +1000,10 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
       </section>
 
       <section id="reading-map">
-        <h2>14. 深入阅读与修改索引</h2>
+        <h2>15. 深入阅读与修改索引</h2>
         <div class="route"><strong>本节回答：</strong>我要改某个东西，应该从哪里下手？</div>
-        <p class="small">如果不熟悉 Web 开发，建议先看 <a href="#browser-role">第 2 章</a>；如果想先理解具体编辑操作，看 <a href="#edit-principles">第 10 章</a>；如果已熟悉编解码算法，建议先看 <a href="#codec-guide">第 17 章</a>，它按“解封装 → 解码 → 编码 → 封装 → 桌面原生”重新组织了阅读顺序。</p>
-        <h3>14.1 分阶段阅读路线</h3>
+        <p class="small">如果不熟悉 Web 开发，建议先看 <a href="#browser-role">第 2 章</a>；如果想先理解具体编辑操作，看 <a href="#edit-principles">第 10 章</a>；如果要改转场，直接看 <a href="#transition-internals">第 11 章</a>；如果已熟悉编解码算法，建议先看 <a href="#codec-guide">第 18 章</a>，它按“解封装 → 解码 → 编码 → 封装 → 桌面原生”重新组织了阅读顺序。</p>
+        <h3>15.1 分阶段阅读路线</h3>
         <table>
           <thead><tr><th>时间</th><th>阅读顺序</th><th>目标</th></tr></thead>
           <tbody>
@@ -752,14 +1014,14 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
             <tr><td>1 周</td><td>WGSL、workers、creation-core、fxpkg、E2E、perf budgets</td><td>进入性能、原生与专项领域。</td></tr>
           </tbody>
         </table>
-        <h3>14.2 修改场景索引</h3>
+        <h3>15.2 修改场景索引</h3>
         <table>
           <thead><tr><th>要改什么</th><th>优先看</th><th>连带检查</th></tr></thead>
           <tbody>
             <tr><td>按钮/菜单文案</td><td><code>EditorMenuBar.tsx</code>、<code>Toolbar.tsx</code></td><td><a href="./界面英文菜单对照.html">英文菜单对照</a>、E2E 选择器</td></tr>
             <tr><td>新增面板</td><td><code>EditorActionRail.tsx</code>、<code>EditorInterface.tsx</code></td><td><code>editor-workspace-store.ts</code>、懒加载与错误边界</td></tr>
             <tr><td>改快捷键</td><td><code>services/keyboard-shortcuts.ts</code></td><td><code>KeyboardShortcutsOverlay.tsx</code>、测试</td></tr>
-            <tr><td>加效果/转场</td><td><code>EffectsTransitionsPanel.tsx</code></td><td><code>core/src/effects</code>、<code>@openreel/ui</code></td></tr>
+            <tr><td>加效果/转场</td><td><code>EffectsTransitionsPanel.tsx</code>；转场底层见 <a href="#transition-internals">第 11 章</a></td><td><code>core/src/effects</code>、<code>core/src/video/transition-engine.ts</code>、<code>core/src/audio/transition-audio-fades.ts</code></td></tr>
             <tr><td>加导出格式</td><td><code>ExportDialog.tsx</code>、<code>export-presets.ts</code></td><td><code>core/src/export</code>、浏览器/桌面能力差异</td></tr>
             <tr><td>改 AI 工具</td><td><code>agent/src/registry.ts</code></td><td><code>editing-tools.ts</code>、<code>live-host.ts</code></td></tr>
             <tr><td>改协作</td><td><code>collab/src/protocol.ts</code>、<code>room-core.ts</code></td><td><code>apps/cloud/src/collab</code></td></tr>
@@ -771,7 +1033,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
       </section>
 
       <section id="risks">
-        <h2>15. 风险与维护提示</h2>
+        <h2>16. 风险与维护提示</h2>
         <div class="route"><strong>本节回答：</strong>哪些地方容易踩坑？</div>
         <ul>
           <li><strong>超大文件</strong>：<code>agent/src/registry.ts</code> 超过三万行，<code>project-store.ts</code> 约 160 KB；修改前先搜索定位。</li>
@@ -784,11 +1046,11 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
       </section>
 
       <section id="technology">
-        <h2>16. 核心技术详解</h2>
+        <h2>17. 核心技术详解</h2>
         <div class="route"><strong>本节回答：</strong>每项技术是什么、在本工程做什么、深入读哪里、有哪些边界？</div>
         <p class="small">点击展开。建议先看“工程职责”和“深入入口”，再决定是否阅读原理资料。</p>
 
-        <h3>16.1 应用与构建</h3>
+        <h3>17.1 应用与构建</h3>
         <details open>
           <summary>React 19 + TypeScript</summary>
           <ul>
@@ -817,7 +1079,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
           </ul>
         </details>
 
-        <h3>16.2 状态与领域模型</h3>
+        <h3>17.2 状态与领域模型</h3>
         <details>
           <summary>Zustand</summary>
           <ul>
@@ -846,7 +1108,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
           </ul>
         </details>
 
-        <h3>16.3 媒体、渲染与计算</h3>
+        <h3>17.3 媒体、渲染与计算</h3>
         <details>
           <summary>WebCodecs + MediaBunny</summary>
           <ul>
@@ -902,7 +1164,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
           </ul>
         </details>
 
-        <h3>16.4 存储、服务与桌面</h3>
+        <h3>17.4 存储、服务与桌面</h3>
         <details>
           <summary>IndexedDB + localStorage</summary>
           <ul>
@@ -973,10 +1235,10 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
       </section>
 
       <section id="codec-guide">
-        <h2>17. 编解码背景程序员快速上手</h2>
+        <h2>18. 编解码背景程序员快速上手</h2>
         <div class="route"><strong>本节回答：</strong>你已经懂 GOP、码控、YUV、封装与时间基，怎样在半天内定位本工程对应的代码？</div>
 
-        <h3>17.1 把你已有的知识映射到这里</h3>
+        <h3>18.1 把你已有的知识映射到这里</h3>
         <p class="small">本工程不是从零写 codec，而是把成熟库编排成编辑器能力：<strong>MediaBunny 负责解封装/封装与样本搬运，WebCodecs 负责浏览器端编码，原生 ffmpeg 负责桌面端专业格式</strong>。</p>
         <table>
           <thead><tr><th>你熟悉的概念</th><th>工程里的对应物</th><th>入口</th><th>关键差异 / 注意</th></tr></thead>
@@ -1044,7 +1306,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
           </tbody>
         </table>
 
-        <h3>17.2 按天上手路线</h3>
+        <h3>18.2 按天上手路线</h3>
         <table>
           <thead><tr><th>时间</th><th>目标</th><th>阅读与实验</th></tr></thead>
           <tbody>
@@ -1071,7 +1333,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
           </tbody>
         </table>
 
-        <h3>17.3 半天速通的最小阅读清单</h3>
+        <h3>18.3 半天速通的最小阅读清单</h3>
         <ol>
           <li><code>packages/core/src/export/types.ts:47-70</code>：先看 <code>ExportSettings</code>，这是所有编码参数的契约。</li>
           <li><code>packages/core/src/export/webcodecs-backend.ts:173-305</code>：看编码与封装如何串起来。</li>
@@ -1080,7 +1342,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
           <li><code>apps/web/src/services/native-ffmpeg-backend.ts</code>：看专业格式为什么必须走桌面。</li>
         </ol>
 
-        <h3>17.4 先记住的 8 个结论</h3>
+        <h3>18.4 先记住的 8 个结论</h3>
         <ul>
           <li><strong>MediaBunny 做 demux/mux，WebCodecs 主要做 encode</strong>；不要把浏览器的解码角色想当然套过来。</li>
           <li>预览层看到的是 <code>ImageBitmap</code>/canvas，不是裸 <code>VideoFrame</code>。</li>
@@ -1092,7 +1354,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
           <li>ProRes、DNxHR、XDCAM、AVC-Intra、MXF、透明通道、高位深必须走桌面原生 ffmpeg。</li>
         </ul>
 
-        <h3>17.5 最容易误判的限制</h3>
+        <h3>18.5 最容易误判的限制</h3>
         <table>
           <thead><tr><th>限制</th><th>表现</th><th>原因 / 处理方式</th></tr></thead>
           <tbody>
@@ -1112,7 +1374,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
 
 
       <section id="appendix">
-        <h2>18. 附录：关键文件索引</h2>
+        <h2>19. 附录：关键文件索引</h2>
         <div class="route"><strong>本节回答：</strong>常用文件都在哪？</div>
         <table>
           <thead><tr><th>文件</th><th>用途</th></tr></thead>
@@ -1126,6 +1388,9 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
             <tr><td><code>apps/web/src/services/export-runner.ts</code></td><td>导出主流程。</td></tr>
             <tr><td><code>packages/core/src/index.ts</code></td><td>核心引擎总入口。</td></tr>
             <tr><td><code>packages/core/src/actions/action-executor.ts</code></td><td>动作执行与撤销基础。</td></tr>
+            <tr><td><code>packages/core/src/video/transition-engine.ts</code></td><td>视频转场算法与窗口计算。</td></tr>
+            <tr><td><code>apps/web/src/bridges/transition-bridge.ts</code></td><td>转场预览桥与 CRUD 委托。</td></tr>
+            <tr><td><code>packages/core/src/audio/transition-audio-fades.ts</code> / <code>clip-fade-envelope.ts</code></td><td>音频转场淡变区间与增益自动化。</td></tr>
             <tr><td><code>packages/agent/src/registry.ts</code></td><td>AI 工具注册表。</td></tr>
             <tr><td><code>packages/collab/src/protocol.ts</code> / <code>room-core.ts</code></td><td>协作协议与服务端逻辑。</td></tr>
             <tr><td><code>apps/cloud/src/collab/room-do.ts</code></td><td>协作 Durable Object。</td></tr>
@@ -1138,7 +1403,7 @@ TransitionEngine：crossfade / wipe / slide / push / zoom / ...
   </div>
 
   <footer>
-    本文档由工程静态分析生成，路径与行号以仓库当前代码为准。结构化重构版：2026-11-19；新增第 2 章“浏览器在工程中的角色”、第 10 章“音视频编辑操作的技术原理”（含贴图、字幕、转场与音画同步）与第 17 章“编解码背景程序员快速上手”。
+    本文档由工程静态分析生成，路径与行号以仓库当前代码为准。结构化重构版：2026-11-20；新增第 2 章“浏览器在工程中的角色”、第 10 章“音视频编辑操作的技术原理”、第 11 章“视频转场与音频转场底层技术详解”与第 18 章“编解码背景程序员快速上手”。
   </footer>
 </body>
 </html>
